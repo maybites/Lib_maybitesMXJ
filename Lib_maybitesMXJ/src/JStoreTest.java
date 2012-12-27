@@ -1,20 +1,20 @@
 import ch.maybites.mxj.utils.pattr.PattrException;
 import ch.maybites.mxj.utils.pattr.PattrHub;
 import ch.maybites.mxj.utils.pattr.PattrStore;
-import ch.maybites.utils.dynlinker.DynLink;
-import ch.maybites.utils.dynlinker.DynLinkRegistrar;
+import ch.maybites.utils.dyndist.DynSubscriber;
+import ch.maybites.utils.dyndist.DynSubscription;
 
 import com.cycling74.max.Atom;
 import com.cycling74.max.DataTypes;
 import com.cycling74.max.MaxObject;
 
 
-public class JStoreTest extends MaxObject implements DynLinkRegistrar {
+public class JStoreTest extends MaxObject implements DynSubscriber {
 
 	String store;
 	
 	float value1, value2, value3, value4;
-	DynLink val1, val2, val3, val4;
+	DynSubscription val1, val2, val3, val4;
 	
 	public JStoreTest(Atom args[]){
 		if(args.length < 1){
@@ -33,10 +33,10 @@ public class JStoreTest extends MaxObject implements DynLinkRegistrar {
 			val2 = PattrHub.getEnv().createLink(this, store, "soap", this, "getValue2", "setValue2");
 			val3 = PattrHub.getEnv().createLink(this, store, "ui::radio", this, "getValue3", "setValue3");
 			val4 = PattrHub.getEnv().createLink(this, store, "ui::soap", this, "getValue4", "setValue4");
-			val1.connect();
-			val2.connect();
-			val3.connect();
-			val4.connect();
+			val1.subscribe();
+			val2.subscribe();
+			val3.subscribe();
+			val4.subscribe();
 		} catch (PattrException e){
 			this.bail(e.getMessage());
 		}
@@ -50,19 +50,19 @@ public class JStoreTest extends MaxObject implements DynLinkRegistrar {
 		switch(getInlet()){
 		case 1:
 			setValue1(f);
-			val1.refresh();
+			val1.callback(this);
 			break;
 		case 2:
 			setValue2(f);
-			val2.refresh();
+			val2.callback(this);
 			break;
 		case 3:
 			setValue3(f);
-			val3.refresh();
+			val3.callback(this);
 			break;
 		case 4:
 			setValue4(f);
-			val4.refresh();
+			val4.callback(this);
 			break;
 		}
 	}
@@ -104,10 +104,10 @@ public class JStoreTest extends MaxObject implements DynLinkRegistrar {
 	}
 
 
-	public void connectedToPointer(DynLink c) {
+	public void publicationConnected(String d, DynSubscription c) {
 	}
 
-	public void disconnectedFromPointer(DynLink c) {
+	public void publicationDisonnected(String d, DynSubscription c) {
 	}
 	
 }

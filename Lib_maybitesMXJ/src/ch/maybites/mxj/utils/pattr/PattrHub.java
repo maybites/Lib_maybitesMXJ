@@ -3,20 +3,20 @@ package ch.maybites.mxj.utils.pattr;
 import java.util.*;
 
 import ch.maybites.tools.Debugger;
-import ch.maybites.utils.dynlinker.DynFactory;
-import ch.maybites.utils.dynlinker.DynLink;
-import ch.maybites.utils.dynlinker.DynLinkRegistrar;
-import ch.maybites.utils.dynlinker.DynPointer;
-import ch.maybites.utils.dynlinker.DynPointerRegistrar;
+import ch.maybites.utils.dyndist.DynDistributor;
+import ch.maybites.utils.dyndist.DynPublication;
+import ch.maybites.utils.dyndist.DynPublisher;
+import ch.maybites.utils.dyndist.DynSubscriber;
+import ch.maybites.utils.dyndist.DynSubscription;
 
 public class PattrHub{
 		
 	private static PattrHub theonlyone = new PattrHub();
 
-	private DynFactory<Object, LinkCallback> factory;
+	private DynDistributor<Object, LinkCallback> factory;
 	
 	private PattrHub(){
-		factory = new DynFactory<Object, LinkCallback>();
+		factory = new DynDistributor<Object, LinkCallback>("PattrHub");
 	}
 	
 	public static PattrHub getEnv(){
@@ -34,27 +34,27 @@ public class PattrHub{
 	 * @return
 	 * @throws PattrException if the get or set-methods dont exist
 	 */
-	public DynLink createLink(
-			DynLinkRegistrar registrar,
+	public DynSubscription createLink(
+			DynSubscriber registrar,
 			String storename, 
 			String address, 
 			Object listener, 
 			String getMethod, 
 			String setMethod) throws PattrException{
 
-		return factory.createLink(registrar, storename, new LinkCallback(address, listener, getMethod, setMethod));
+		return factory.create(registrar, storename, new LinkCallback(address, listener, getMethod, setMethod));
 	}
 	
-	public void removeLinks(DynLinkRegistrar registrar){
-		factory.disconnectLinks(registrar);
+	public void removeLinks(DynSubscriber registrar){
+		factory.unsubscribe(registrar);
 	}
 	
-	protected DynPointer registerStore(PattrStore store, String storename){
-		return factory.createPointer(store, storename, null);
+	protected DynPublication registerStore(PattrStore store, String storename){
+		return factory.create(store, storename, null);
 	}
 	
 	protected void removeStore(PattrStore store){
-		factory.unregisterPointer(store.getStoreName());
+		factory.recall(store.getStoreName());
 	}
 
 

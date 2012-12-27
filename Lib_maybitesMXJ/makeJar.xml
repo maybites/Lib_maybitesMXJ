@@ -10,8 +10,8 @@
         <property name="project.name" value="Lib_maybitesCore"/>
  		<property name="main.class.name" value=""/>
  		<property name="jar.name" value="maybitesMXJ.jar"/>
- 		<property name="export.dir" value="/Users/maybites/Arbeiten/02_code/library/java/maybites/mxj"/>
- 		<property name="createJavaDoc" value="1" />
+ 		<property name="export.dir" value="/Users/maybites/Arbeiten/02_code/library/max/maybites/mxj/java"/>
+ 		<property name="createJavaDoc" value="0" />
  		
 		<path id="library-classpath">
 			<fileset dir="${libraryClasspath}" >
@@ -23,7 +23,6 @@
 			</fileset>
 		</path>
  
- 	
  		<!--
  		==================================================================
  			DO NOT CHANGE BELOW UNLESS YOU KNOW WHAT YOU ARE DOIN
@@ -93,7 +92,7 @@
 
  		 		<target name="doc.build" if="makeDoc">
  		 	    <!-- create the java reference of the library -->
- 			 	    <javadoc bottom="Maybites.ch library ${libraryName} by ${author}. ${copyright}"
+ 			 	    <javadoc bottom="library ${libraryName} by ${author}. ${copyright}"
  			 	 	     destdir="${project.reference.dir}"
  			 	 	     verbose="false"
  			 	 	     stylesheetfile="${project.resources.dir}/stylesheet.css"

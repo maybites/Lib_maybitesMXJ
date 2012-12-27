@@ -6,14 +6,14 @@ import java.util.Hashtable;
 import java.util.Iterator;
 
 import ch.maybites.tools.Debugger;
-import ch.maybites.utils.dynlinker.DynException;
-import ch.maybites.utils.dynlinker.DynLink;
-import ch.maybites.utils.dynlinker.DynPointer;
-import ch.maybites.utils.dynlinker.DynPointerRegistrar;
+import ch.maybites.utils.dyndist.DynException;
+import ch.maybites.utils.dyndist.DynPublication;
+import ch.maybites.utils.dyndist.DynPublisher;
+import ch.maybites.utils.dyndist.DynSubscription;
 
 import com.cycling74.max.Callback;
 
-public class PattrStore implements DynPointerRegistrar{
+public class PattrStore implements DynPublisher{
 
 	ArrayList<String> pattrClients;
 	ArrayList<LinkCallback> connections;
@@ -29,7 +29,7 @@ public class PattrStore implements DynPointerRegistrar{
 	
 	public void register() throws PattrException{
 		try{
-			PattrHub.getEnv().registerStore(this, storename).register();
+			PattrHub.getEnv().registerStore(this, storename).publish();
 		} catch(DynException e){
 			throw new PattrException(e.getMessage());
 		}
@@ -73,18 +73,18 @@ public class PattrStore implements DynPointerRegistrar{
 	}
 
 
-	public void pointerConnectedTo(DynLink c) {
-		connections.add((LinkCallback) c.getCallback());
+	public void subscriptionConnected(String d, DynSubscription c) {
+		connections.add((LinkCallback) c.getCallbackObject());
 	}
 
 
-	public void pointerDisconnectedFrom(DynLink c) {
-		connections.remove((LinkCallback) c.getCallback());
+	public void subscriptionDisconnected(String d, DynSubscription c) {
+		connections.remove((LinkCallback) c.getCallbackObject());
 	}
 
 
-	public boolean linkRefresh(DynPointer pointer, DynLink linker) {
-		LinkCallback conn = (LinkCallback) linker.getCallback();
+	public boolean subscriptionCallback(String d, DynSubscription linker) {
+		LinkCallback conn = (LinkCallback) linker.getCallbackObject();
 		callback.setAddressValue(conn.getAddress(), conn.get());
 		return true;
 	}
