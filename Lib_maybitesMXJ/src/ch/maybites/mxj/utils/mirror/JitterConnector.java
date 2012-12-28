@@ -28,7 +28,7 @@ public class JitterConnector {
 	 * @param message
 	 * @param args
 	 */
-	protected final void maxResponse(String message, Atom[] args){
+	public final void maxResponse(String message, Atom[] args){
 		response = new Atom[args.length + 1];
 		response[0] = Atom.newAtom(message);
 		for(int i = 0; i < args.length; i++){
