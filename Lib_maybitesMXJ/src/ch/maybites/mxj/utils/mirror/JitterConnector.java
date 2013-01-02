@@ -11,15 +11,13 @@ import com.cycling74.max.MaxObject;
  */
 public class JitterConnector {
 
-	private MaxObject max;	
+	private JitterMirror max;	
 	private Atom[] response;
-	private int outputInlet;
 	
 	public JitterConnector(){
 	}
 	
-	protected final void init(MaxObject _max, int _outputInlet){
-		outputInlet = _outputInlet;
+	protected final void init(JitterMirror _max){
 		max = _max;
 	}
 	
@@ -85,8 +83,8 @@ public class JitterConnector {
 	
 	private final void output(String messagename, Atom[] args){
 		if(args != null)
-			max.outlet(outputInlet, messagename, args);
+			max.mirrorOutput(messagename, args);
 		else
-			max.outlet(outputInlet, messagename);
+			max.mirrorOutput(messagename);
 	}
 }

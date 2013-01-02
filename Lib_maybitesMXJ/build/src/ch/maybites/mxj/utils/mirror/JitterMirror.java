@@ -1,5 +1,6 @@
 package ch.maybites.mxj.utils.mirror;
 
+import com.cycling74.jitter.JitterEvent;
 import com.cycling74.max.Atom;
 import com.cycling74.max.DataTypes;
 import com.cycling74.max.MaxObject;
@@ -43,14 +44,40 @@ public class JitterMirror extends MaxObject{
 	 */
 	public void bang(){
 		if(getInlet() == MAIN_INLET){
-			connector.init(this, JIT_MIRROR_OUTLET);
+			connector.init(this);
 		}
 	}
-	
+
+	/**
+	 * The Child class can overwrite this method and decide what to do with it,
+	 * since some Events can be caused by user interactions to the jitter object.
+	 * 
+	 * Just make sure to implement the line:
+	 * 
+	 * super.connector.maxResponse(message, args);
+	 * 
+	 * otherwise queries to the jitter object will be go into that data nirvana.
+	 * 
+	 * @param event
+	 */
+	public void jitterEvent(String message, Atom[] args){
+		connector.maxResponse(message, args);
+	}
+
+	/**
+	 * The Child class can overwrite this method and decide what to do with it.
+	 * This message is called if a change was made to the mirrored jitter object,
+	 * no matter if on the maxMSP level or via the java handle.
+	 * 
+	 * @param messagename
+	 */
+	public void changeEvent(String messagename){
+	}
+
 	public void anything(String message, Atom[] args){
 		if(getInlet() == JIT_MIRROR_INLET){
 			//This is a response message from the mirrored jitter object
-			connector.maxResponse(message, args);
+			jitterEvent(message, args);
 		} else if(getInlet() == JIT_MSG_INLET){
 			if(message.startsWith("@") && args.length > 0){
 				//This is an attribute message to the mirrored jitter object
@@ -64,11 +91,44 @@ public class JitterMirror extends MaxObject{
 					//This is a message to the mirrored jitter object
 					ret = connector.send(message);				
 				if(ret != null && ret.length > 0)
-					outlet(JIT_MSG_OUTLET, ret);
+					messageOutput(ret);
 			}
 		} else {
 			// messages meant for this max object
 		}
 	}
+	
+	/**
+	 * Prints a Message to the Jitter Message Outlet
+	 * @param msg
+	 */
+	public void messageOutput(Atom[] msg){
+		outlet(JIT_MSG_OUTLET, msg);
+	}
 
+	/**
+	 * Prints a Message to the Jitter Message Outlet
+	 * @param msg
+	 */
+	public void messageOutput(String message, Atom[] args){
+		outlet(JIT_MSG_OUTLET, message, args);
+	}
+
+	/**
+	 * Prints a Message to the Jitter mirror Outlet
+	 * @param msg
+	 */
+	public void mirrorOutput(String message){
+		changeEvent(message);
+		outlet(JIT_MIRROR_OUTLET, message);
+	}
+
+	/**
+	 * Prints a Message to the Jitter mirror Outlet
+	 * @param msg
+	 */
+	public void mirrorOutput(String message, Atom[] args){
+		changeEvent(message);
+		outlet(JIT_MIRROR_OUTLET, message, args);
+	}
 }

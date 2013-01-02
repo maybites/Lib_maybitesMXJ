@@ -44,7 +44,7 @@ public class JitterMirror extends MaxObject{
 	 */
 	public void bang(){
 		if(getInlet() == MAIN_INLET){
-			connector.init(this, JIT_MIRROR_OUTLET);
+			connector.init(this);
 		}
 	}
 
@@ -63,7 +63,17 @@ public class JitterMirror extends MaxObject{
 	public void jitterEvent(String message, Atom[] args){
 		connector.maxResponse(message, args);
 	}
-	
+
+	/**
+	 * The Child class can overwrite this method and decide what to do with it.
+	 * This message is called if a change was made to the mirrored jitter object,
+	 * no matter if on the maxMSP level or via the java handle.
+	 * 
+	 * @param messagename
+	 */
+	public void changeEvent(String messagename){
+	}
+
 	public void anything(String message, Atom[] args){
 		if(getInlet() == JIT_MIRROR_INLET){
 			//This is a response message from the mirrored jitter object
@@ -104,4 +114,21 @@ public class JitterMirror extends MaxObject{
 		outlet(JIT_MSG_OUTLET, message, args);
 	}
 
+	/**
+	 * Prints a Message to the Jitter mirror Outlet
+	 * @param msg
+	 */
+	public void mirrorOutput(String message){
+		changeEvent(message);
+		outlet(JIT_MIRROR_OUTLET, message);
+	}
+
+	/**
+	 * Prints a Message to the Jitter mirror Outlet
+	 * @param msg
+	 */
+	public void mirrorOutput(String message, Atom[] args){
+		changeEvent(message);
+		outlet(JIT_MIRROR_OUTLET, message, args);
+	}
 }
