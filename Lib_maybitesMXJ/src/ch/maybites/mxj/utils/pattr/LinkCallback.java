@@ -33,6 +33,8 @@ public class LinkCallback {
 	private Object client;
 	private String address;
 	
+	private float value = 0;
+	
 	public LinkCallback(String _address, Object _client, String _getter, String _setter) throws PattrException{
 		client = _client;
 		address = _address;
@@ -51,9 +53,10 @@ public class LinkCallback {
 	}
 	
 	protected void set(String _address, float _value){
-		if(_address.equals(address) && setter != null){
+		if(_address.equals(address) && setter != null && value != _value){
 			try {
 				setter.invoke(client, _value);
+				value = _value;
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

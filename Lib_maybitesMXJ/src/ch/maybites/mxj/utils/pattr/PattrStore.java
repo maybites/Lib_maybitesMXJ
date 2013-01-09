@@ -35,33 +35,34 @@ import ch.maybites.utils.dyndist.DynSubscription;
 
 import com.cycling74.max.Callback;
 
-public class PattrStore implements DynPublisher{
+public class PattrStore{
 
 	ArrayList<String> pattrClients;
-	ArrayList<LinkCallback> connections;
 	
 	private String storename;
 	private PattrCallback callback;
 	
-	public PattrStore(String _storename){
-		connections = new ArrayList<LinkCallback>();
+	private StorePublisher publisher;
+	
+	public PattrStore(){
+		publisher = new StorePublisher();
 		pattrClients = new ArrayList<String>();
-		storename = _storename;
 	}
-	
-	public void register() throws PattrException{
-		try{
-			PattrHub.getEnv().registerStore(this, storename).publish();
-		} catch(DynException e){
-			throw new PattrException(e.getMessage());
-		}
-	}
-	
+
 	public void init(PattrCallback _callback){
 		callback = _callback;
 		pattrClients.clear();
 	}
-	
+
+	public void register(String _storename) throws PattrException{
+		try{
+			publisher.registerStore(this, _storename);
+		} catch(DynException e){
+			throw new PattrException(e.getMessage());
+		}
+		storename = _storename;
+	}
+		
 	public String getStoreName(){
 		return storename;
 	}
@@ -75,13 +76,8 @@ public class PattrStore implements DynPublisher{
 	}
 	
 	public boolean clientEvent(String event, float value){
-		if(pattrClients.contains(event)){
-			//Debugger.getInstance().debugMessage(this.getClass(), "connections listening: " + connections.size());
-			for(int i = 0; i < connections.size(); i++){
-				//Debugger.getInstance().debugMessage(this.getClass(), "connect eventmessage '" + event + "' with value '" + value + "'");
-				connections.get(i).set(event, value);
-			}
-			return true;
+		if(pattrClients.contains(event) && publisher != null){
+			publisher.clientEvent(event, value);
 		}
 		return false;
 	}
@@ -90,25 +86,53 @@ public class PattrStore implements DynPublisher{
 	 * is beeing called if the mxj-wrapper is deleted
 	 */
 	public void notifyDeleted(){
-		PattrHub.getEnv().removeStore(this);
-		connections.clear();
+		publisher.notifyDeleted();
+		pattrClients.clear();
 	}
+	
+	protected class StorePublisher implements DynPublisher{
+		DynPublication publication;
+		ArrayList<LinkCallback> connections;
+		
+		StorePublisher(){
+			connections = new ArrayList<LinkCallback>();
+		}
+		
+		protected void notifyDeleted(){
+			if(publication != null)
+				publication.recall();
+			connections.clear();
+		}
+		
+		protected void registerStore(PattrStore store, String _storename) throws DynException{
+			if(publication != null){
+				publication.recall();
+			}
+			publication = PattrSystem.getEnv().registerStore(this, _storename);
+			publication.publish();
+//			Debugger.verbose("PattrStore", "Published Object: " + _storename);
+		}
 
+		protected boolean clientEvent(String event, float value){
+			for(int i = 0; i < connections.size(); i++){
+				connections.get(i).set(event, value);
+			}
+			return true;
+		}
+		
+		public void subscriptionConnected(String distributor, DynSubscription subscription) {
+			connections.add((LinkCallback) subscription.getCallbackObject());
+		}
 
-	public void subscriptionConnected(String d, DynSubscription c) {
-		connections.add((LinkCallback) c.getCallbackObject());
-	}
+		public void subscriptionDisconnected(String distributor, DynSubscription subscription) {
+			connections.remove((LinkCallback) subscription.getCallbackObject());
+		}
 
-
-	public void subscriptionDisconnected(String d, DynSubscription c) {
-		connections.remove((LinkCallback) c.getCallbackObject());
-	}
-
-
-	public boolean subscriptionCallback(String d, DynSubscription linker) {
-		LinkCallback conn = (LinkCallback) linker.getCallbackObject();
-		callback.setAddressValue(conn.getAddress(), conn.get());
-		return true;
+		public boolean subscriptionCallback(String distributor, DynSubscription subscription) {
+			LinkCallback conn = (LinkCallback) subscription.getCallbackObject();
+			callback.setAddressValue(conn.getAddress(), conn.get());
+			return true;
+		}
 	}
 
 }

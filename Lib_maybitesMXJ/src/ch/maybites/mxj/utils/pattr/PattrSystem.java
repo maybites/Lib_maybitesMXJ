@@ -31,17 +31,17 @@ import ch.maybites.utils.dyndist.DynPublisher;
 import ch.maybites.utils.dyndist.DynSubscriber;
 import ch.maybites.utils.dyndist.DynSubscription;
 
-public class PattrHub{
+public class PattrSystem{
 		
-	private static PattrHub theonlyone = new PattrHub();
+	private static PattrSystem theonlyone = new PattrSystem();
 
 	private DynDistributor<Object, LinkCallback> factory;
 	
-	private PattrHub(){
+	private PattrSystem(){
 		factory = new DynDistributor<Object, LinkCallback>("PattrHub");
 	}
 	
-	public static PattrHub getEnv(){
+	public static PattrSystem getEnv(){
 		return theonlyone;
 	}
 
@@ -71,7 +71,7 @@ public class PattrHub{
 		factory.unsubscribe(registrar);
 	}
 	
-	protected DynPublication registerStore(PattrStore store, String storename){
+	protected DynPublication registerStore(DynPublisher store, String storename){
 		return factory.create(store, storename, null);
 	}
 	

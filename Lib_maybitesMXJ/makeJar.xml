@@ -57,9 +57,7 @@
 			 		<copy file="${JitterJar}"
  			 		    todir="${project.libs.dir}"/>
 
- 			 		<copy file="COPYING"
- 			 		    todir="${project.build.dir}"/>
- 			 		<copy file="COPYING.LESSER"
+ 			 		<copy file="MIT.LICENSE"
  			 		    todir="${project.build.dir}"/>
  				
  					<condition property="makeDoc">

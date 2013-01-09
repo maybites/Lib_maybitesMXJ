@@ -14,7 +14,7 @@ import ch.maybites.tools.threedee.*;
  *
  * Max object container for test purposes
  */
-public class JPattrStorage extends MaxObject implements PattrCallback{
+public class JPattrHub extends MaxObject implements PattrCallback{
 
 	private PattrStore storage;
 	private String storename;
@@ -22,14 +22,14 @@ public class JPattrStorage extends MaxObject implements PattrCallback{
 	private final int PATTR_INLET = 1;
 	private final int PATTR_OUTLET = 1;
 
-	public JPattrStorage(Atom args[]){
+	public JPattrHub(Atom args[]){
 		if(args.length < 1){
 			this.bail("JPattrStore: requires address");
 		}
 		storage = new PattrStore();
 		storename = args[0].toString();
 
-		declareAttribute("storename", null, "setstore");
+		declareAttribute("storename", null, "storename");
 		declareInlets(new int[]{ DataTypes.ALL, DataTypes.ALL});
 		declareOutlets(new int[]{ DataTypes.ALL, DataTypes.ALL});
 		createInfoOutlet(false);
@@ -38,18 +38,18 @@ public class JPattrStorage extends MaxObject implements PattrCallback{
 	public void notifyDeleted(){
 		storage.notifyDeleted();
 	}
-	
+
 	public void bang(){
 		storage.init(this);
 		try{
 			storage.register(storename);
 		}catch(PattrException e){
-			error("JPattrStore: Address '"+storename+"' already taken.");
+			error("JPattrHub: Address '"+storename+"' already taken.");
 		}
-		// sets the pattrStorage to send all changes of the clients
-		outlet(PATTR_OUTLET, "outputmode", Atom.newAtom(1)); 
-		// lets the pattrStorage send all the clients names
-		outlet(PATTR_OUTLET, "getclientlist"); 
+		if(getInlet() == 0){
+			// lets the pattrStorage send all the clients names
+			outlet(PATTR_OUTLET, "getattributes"); 
+		}
 	}
 
 	public void setAddressValue(String address, float value){
@@ -58,14 +58,14 @@ public class JPattrStorage extends MaxObject implements PattrCallback{
 	}
 
 
-	public void clientlist(Atom[] args){
+	public void attributes(Atom[] args){
 		if(getInlet() == PATTR_INLET){
-			if(args.length == 1){
-				if(args[0].toString().equals("done"))
-					notifylisteners();
-				else
-					storage.addClient(args[0].toString());
+			for(int i = 0; i < args.length; i++){
+				storage.addClient(args[i].toString());			
 			}
+			notifylisteners();
+			// and request all the values of the clients
+			outlet(PATTR_OUTLET, "getstate"); 
 		}
 	}
 
@@ -101,7 +101,7 @@ public class JPattrStorage extends MaxObject implements PattrCallback{
 	private void notifylisteners(){
 		ArrayList<String> clients = storage.getClients();
 		for(int i = 0; i < clients.size(); i++){
-			post("registered: " + clients.get(i));
+			Debugger.verbose("PattrHub: " + storename," has registered: " + clients.get(i));
 		}
 	}
 

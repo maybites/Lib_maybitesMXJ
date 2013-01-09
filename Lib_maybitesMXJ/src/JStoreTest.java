@@ -1,5 +1,5 @@
 import ch.maybites.mxj.utils.pattr.PattrException;
-import ch.maybites.mxj.utils.pattr.PattrHub;
+import ch.maybites.mxj.utils.pattr.PattrSystem;
 import ch.maybites.mxj.utils.pattr.PattrStore;
 import ch.maybites.utils.dyndist.DynSubscriber;
 import ch.maybites.utils.dyndist.DynSubscription;
@@ -29,10 +29,10 @@ public class JStoreTest extends MaxObject implements DynSubscriber {
 	
 	public void bang(){
 		try{
-			val1 = PattrHub.getEnv().createLink(this, store, "radio", this, "getValue1", "setValue1");
-			val2 = PattrHub.getEnv().createLink(this, store, "soap", this, "getValue2", "setValue2");
-			val3 = PattrHub.getEnv().createLink(this, store, "ui::radio", this, "getValue3", "setValue3");
-			val4 = PattrHub.getEnv().createLink(this, store, "ui::soap", this, "getValue4", "setValue4");
+			val1 = PattrSystem.getEnv().createLink(this, store, "radio", this, "getValue1", "setValue1");
+			val2 = PattrSystem.getEnv().createLink(this, store, "soap", this, "getValue2", "setValue2");
+			val3 = PattrSystem.getEnv().createLink(this, store, "ui::radio", this, "getValue3", "setValue3");
+			val4 = PattrSystem.getEnv().createLink(this, store, "ui::soap", this, "getValue4", "setValue4");
 			val1.subscribe();
 			val2.subscribe();
 			val3.subscribe();
@@ -43,7 +43,7 @@ public class JStoreTest extends MaxObject implements DynSubscriber {
 	}
 
 	public void notifyDeleted(){
-		PattrHub.getEnv().removeLinks(this);
+		PattrSystem.getEnv().removeLinks(this);
 	}
 
 	public void inlet(float f){
