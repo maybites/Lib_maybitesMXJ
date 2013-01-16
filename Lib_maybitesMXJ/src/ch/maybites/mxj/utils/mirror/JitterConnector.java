@@ -93,7 +93,7 @@ public class JitterConnector {
 	}
 
 	public static Atom[] dropFirstIndex(Atom[] args){
-		if(args.length > 1){
+		if(args != null && args.length > 1){
 			Atom[] ret = new Atom[args.length - 1];
 			for(int i = 1; i < args.length; i++){
 				ret[i - 1] = args[i];
