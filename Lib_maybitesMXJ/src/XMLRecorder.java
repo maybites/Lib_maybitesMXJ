@@ -69,10 +69,12 @@ public class XMLRecorder extends MaxObject
 	static final String ATTR_TAG = "tag";
 	static final String ATTR_ADDRESS = "address";
 	
-	long pastFrameTime = 500;
-	long delayTime = 250;
+	long pastFrameTime;
+	long delayTime = 40;
 	long lastFrameTime;
 	long startTime;
+	long pausedTime;
+	long pauseTime;
 	
 	Document dasDOMObjekt;
 	NodeIterator keyFrames;
@@ -80,18 +82,15 @@ public class XMLRecorder extends MaxObject
 	
 	String filepath;
 	String path;
-	
-	boolean isPlaying;
-	
+		
 	MaxClock clock;
 
 	public XMLRecorder(Atom[] args)
 	{
 		if(args.length == 1){
 			delayTime = args[0].toLong();
-			pastFrameTime = delayTime * 2;
 		}
-		isPlaying = false;
+		pastFrameTime = delayTime * 3;
 		path = null;
 		
 		clock = new MaxClock(new Callback(this, "time"));
@@ -99,7 +98,7 @@ public class XMLRecorder extends MaxObject
 		declareAttribute("path", null, "setpath");
 		declareInlets(new int[]{DataTypes.ALL});
 		declareOutlets(new int[]{DataTypes.ALL, DataTypes.INT});
-		post("XMLRecorder Version 005");
+		post("XMLRecorder Version 006");
 	}
 	
 	public void notifyDeleted(){
@@ -144,53 +143,65 @@ public class XMLRecorder extends MaxObject
 			clock.unset();
 		} 
 	}
-
-	private long getRunningTime(){
-		return (long) clock.getTime() - startTime;
+	
+	public void start(Atom[] dasSkript){
+		if(dasDOMObjekt != null){
+			keyFrames = new NodeIterator(dasDOMObjekt.getElementsByTagName(ELEMENT_KEYFRAME));
+			frames = null;
+			clock.delay(0);
+			pausedTime = 0;
+			startTime = (long)clock.getTime();
+		}
+	}
+	
+	public void pause(){
+		pauseTime = (long)clock.getTime();
+		clock.unset();
+	}
+	
+	public void play(){
+		pausedTime += (long)clock.getTime() - pauseTime;
+		clock.delay(0);
 	}
 	
 	public void time(){
-		long current = getRunningTime();	
-		if(isPlaying){
-			if(keyFrames.hasCurrent()){
-				if(frames == null){ // the keyframe has not been triggered yet
-					if(checkKeyTime(current, keyFrames.getCurrent())){
-						frames = new NodeIterator(keyFrames.getCurrent().getChildNodes());
-						lastFrameTime = current;
-					}
+		clock.delay(delayTime);
+		long currentTime = getCurrentTime();	
+		if(keyFrames.hasCurrent()){
+			if(frames == null){ // the keyframe has not been triggered yet
+				if(checkTrigger(currentTime, keyFrames.getCurrent())){
+					frames = new NodeIterator(keyFrames.getCurrent().getChildNodes());
+					lastFrameTime = currentTime;
 				}
-				if(frames != null){
-					//iterate through the frames until a correct node is current
-					while(frames.hasCurrent() && !frames.getCurrent().getNodeName().equals(ELEMENT_FRAME)){
-						frames.iterate();
-					}
-					if(frames.hasCurrent()){
-						if((current - lastFrameTime) > getTime(frames.getCurrent())){
-							// send the events out
-							processEvents(new NodeIterator(frames.getCurrent().getChildNodes()));
-							frames.iterate(); // and get the next frame
-							lastFrameTime = current;
-						}
-					} else { // if there are no more frames
-						frames = null; 
-						keyFrames.iterate(); // make the next keyframe current
-						post("all frames are through...next keyframe");
-					}
-				}
-			} else { // there are no more keyframes: the script is over
-				scriptDone();
 			}
-			if(keyFrames.hasNext()){ //check if maybe the next keyframe should kick in
-				if(checkKeyTime(current, keyFrames.getNext())){ 
-					// if this is the case
+			if(frames != null){
+				//iterate through the frames until a correct node is current
+				while(frames.hasCurrent() && !frames.getCurrent().getNodeName().equals(ELEMENT_FRAME)){
+					frames.iterate();
+				}
+				if(frames.hasCurrent()){
+					if((currentTime - lastFrameTime) > getTriggerTime(frames.getCurrent())){
+						// send the events out
+						processEvents(new NodeIterator(frames.getCurrent().getChildNodes()));
+						frames.iterate(); // and get the next frame
+						lastFrameTime = currentTime;
+					}
+				} else { // if there are no more frames
 					frames = null; 
 					keyFrames.iterate(); // make the next keyframe current
-					post("next keyframe kicks in");
 				}
 			}
+		} else { // there are no more keyframes: the script is over
+			scriptDone();
 		}
-		printTime(current);
-		clock.delay(delayTime);
+		if(keyFrames.hasNext()){ //check if maybe the next keyframe should kick in
+			if(checkTrigger(currentTime, keyFrames.getNext())){ 
+				// if this is the case
+				frames = null; 
+				keyFrames.iterate(); // make the next keyframe current
+			}
+		}
+		printTime(currentTime);
 	}
 	
 	private void processEvents(NodeIterator events){
@@ -240,17 +251,7 @@ public class XMLRecorder extends MaxObject
 		else 
 			eventOut(atoms);
 	}
-	  
-	public void start(Atom[] dasSkript){
-		if(dasDOMObjekt != null){
-			keyFrames = new NodeIterator(dasDOMObjekt.getElementsByTagName(ELEMENT_KEYFRAME));
-			frames = null;
-			isPlaying = true;
-			clock.delay(0);
-			startTime = (long)clock.getTime();
-		}
-	}
-	
+	  	
 	/**
 	 * checks if the current time has passed the frametime and if it is not to far
 	 * in the future.
@@ -259,12 +260,12 @@ public class XMLRecorder extends MaxObject
 	 * @param frame
 	 * @return
 	 */
-	private boolean checkKeyTime(long current, Node frame){
-		long triggerFrameTime = getTime(frame);
+	private boolean checkTrigger(long current, Node frame){
+		long triggerFrameTime = getTriggerTime(frame);
 		return (current - pastFrameTime < triggerFrameTime && current > triggerFrameTime)? true: false;
 	}
 	
-	private long getTime(Node frame){
+	private long getTriggerTime(Node frame){
 		if(frame.hasAttributes()){
 			NamedNodeMap dieAttribute = frame.getAttributes();
 			for (int i = 0; i < dieAttribute.getLength(); i++){
@@ -276,7 +277,11 @@ public class XMLRecorder extends MaxObject
 		}
 		return 0;
 	}
-	
+
+	private long getCurrentTime(){
+		return (long) clock.getTime() - pausedTime - startTime;
+	}
+
 	
 	private long parseTimeString(String timestring){
 		long time = 0;
@@ -318,7 +323,7 @@ public class XMLRecorder extends MaxObject
 	}
 	
 	private void scriptDone(){
-		isPlaying = false;
+		clock.unset();
 		outletHigh(this.getInfoIdx(), "done");
 	}
 	
