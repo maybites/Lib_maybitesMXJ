@@ -60,33 +60,69 @@ public class XMLRecorder extends MaxObject
 	static final String ELEMENT_KEYFRAME = "keyframe";
 	static final String ELEMENT_FRAME = "frame";
 	static final String ELEMENT_EVENT = "event";
+	static final String ELEMENT_OSCEVENT = "oscevent";
 	
 	static final String ATTR_TIME = "time";
 	static final String ATTR_VALUE = "value";
 	static final String ATTR_TYPETAG = "typetag";
+	static final String ATTR_TYPE = "type";
+	static final String ATTR_TAG = "tag";
+	static final String ATTR_ADDRESS = "address";
 	
-	long naechsterZeitpunkt = 0;
-	int derEventCounter;
+	long pastFrameTime = 500;
+	long delayTime = 250;
+	long lastFrameTime;
+	long startTime;
+	
 	Document dasDOMObjekt;
 	NodeIterator keyFrames;
 	NodeIterator frames;
 	
 	String filepath;
+	String path;
 	
-	long keyframetime;
+	boolean isPlaying;
+	
+	MaxClock clock;
 
 	public XMLRecorder(Atom[] args)
 	{
-		declareInlets(new int[]{DataTypes.INT, DataTypes.LIST});
-		declareOutlets(new int[]{DataTypes.ALL,DataTypes.ALL});
-		post("XMLRecorder Version 003");
+		if(args.length == 1){
+			delayTime = args[0].toLong();
+			pastFrameTime = delayTime * 2;
+		}
+		isPlaying = false;
+		path = null;
+		
+		clock = new MaxClock(new Callback(this, "time"));
+		
+		declareAttribute("path", null, "setpath");
+		declareInlets(new int[]{DataTypes.ALL});
+		declareOutlets(new int[]{DataTypes.ALL, DataTypes.INT});
+		post("XMLRecorder Version 005");
+	}
+	
+	public void notifyDeleted(){
+		clock.release();
+	}
+	
+	public void setpath(String _path){
+		path = _path;
 	}
     
-	public void read(Atom[] path){		
-		if(path != null && path.length == 1){
-			filepath = path[0].toString();
-			derEventCounter = 0;
-			naechsterZeitpunkt = 0;
+	private String createFilePath(String file){
+		if(path != null)
+			if(path.endsWith("/"))
+				return path + file;
+			else
+				return path + "/" + file;
+		else 
+			return file;
+	}
+	
+	public void read(Atom[] file){		
+		if(file != null && file.length == 1){
+			filepath = createFilePath(file[0].toString());
 			File dieXMLDatei = new File(filepath);
 			DocumentBuilderFactory dasDBFactoryObjekt = DocumentBuilderFactory.newInstance();
 			post("Loaded successfull: "+dieXMLDatei.getAbsolutePath());
@@ -104,63 +140,131 @@ public class XMLRecorder extends MaxObject
 				error("XMLRecorder: no keyframes found in file");
 				return;
 			}
-			post("Found "+keyFrames.size()+" keyframes.");
+			fileLoaded();
+			clock.unset();
 		} 
 	}
 
-	public void time(int aktuelleZeit){
-		if(keyFrames.hasCurrent()){
-			if(frames == null){ // the keyframe has not been triggered yet
-				if(aktuelleZeit > getTime(keyFrames.getCurrent())){
-					frames = new NodeIterator(keyFrames.getCurrent().getChildNodes());
-					keyframetime = aktuelleZeit;
-				}
-			}
-			if(frames != null){
-				//iterate through the frames until a correct node is current
-				while(frames.hasCurrent() && !frames.getCurrent().getNodeName().equals(ELEMENT_FRAME)){
-					frames.iterate();
-				}
-				if(frames.hasCurrent()){
-					int nodetime = getTime(frames.getCurrent());
-					if((aktuelleZeit - keyframetime) > getTime(frames.getCurrent())){
-						// send the events out
-						processEvents(new NodeIterator(frames.getCurrent().getChildNodes()));
-						frames.iterate(); // and get the next frame
-					}
-				} else { // if there are no more frames
-					frames = null; 
-					keyFrames.iterate(); // make the next keyframe current
-				}
-			}
-		}
-		if(keyFrames.hasNext()){ //check if maybe the next keyframe should kick in
-			if(aktuelleZeit > getTime(keyFrames.getNext())){ 
-				// if this is the case
-				frames = null; 
-				keyFrames.iterate(); // make the next keyframe current
-			}
-		}
+	private long getRunningTime(){
+		return (long) clock.getTime() - startTime;
 	}
 	
-	public void processEvents(NodeIterator events){
+	public void time(){
+		long current = getRunningTime();	
+		if(isPlaying){
+			if(keyFrames.hasCurrent()){
+				if(frames == null){ // the keyframe has not been triggered yet
+					if(checkKeyTime(current, keyFrames.getCurrent())){
+						frames = new NodeIterator(keyFrames.getCurrent().getChildNodes());
+						lastFrameTime = current;
+					}
+				}
+				if(frames != null){
+					//iterate through the frames until a correct node is current
+					while(frames.hasCurrent() && !frames.getCurrent().getNodeName().equals(ELEMENT_FRAME)){
+						frames.iterate();
+					}
+					if(frames.hasCurrent()){
+						if((current - lastFrameTime) > getTime(frames.getCurrent())){
+							// send the events out
+							processEvents(new NodeIterator(frames.getCurrent().getChildNodes()));
+							frames.iterate(); // and get the next frame
+							lastFrameTime = current;
+						}
+					} else { // if there are no more frames
+						frames = null; 
+						keyFrames.iterate(); // make the next keyframe current
+						post("all frames are through...next keyframe");
+					}
+				}
+			} else { // there are no more keyframes: the script is over
+				scriptDone();
+			}
+			if(keyFrames.hasNext()){ //check if maybe the next keyframe should kick in
+				if(checkKeyTime(current, keyFrames.getNext())){ 
+					// if this is the case
+					frames = null; 
+					keyFrames.iterate(); // make the next keyframe current
+					post("next keyframe kicks in");
+				}
+			}
+		}
+		printTime(current);
+		clock.delay(delayTime);
+	}
+	
+	private void processEvents(NodeIterator events){
 		while(events.hasCurrent()){
 			Node event = events.getCurrent();
 			if(event.getNodeName().equals(ELEMENT_EVENT)){
-				post("value: " + event.getTextContent());
+				processEvent(event);
 			}
 			events.iterate();
 		}
 	}
-	    
-	public void play(Atom[] dasSkript){
+	
+	private void processEvent(Node event){
+		char[] typetag = null;
+		String tag = null;
+		if(event.hasAttributes()){
+			Node typetagnode = event.getAttributes().getNamedItem(ATTR_TYPETAG);
+			if(typetagnode != null)
+				typetag = typetagnode.getNodeValue().toCharArray();
+			Node tagnode = event.getAttributes().getNamedItem(ATTR_TAG);
+			if(tagnode != null)
+				tag = tagnode.getNodeValue();
+		}
+		String value = event.getTextContent();
+		String[] list = value.split(" ");
+		Atom[] atoms = new Atom[list.length];
+		for(int i = 0; i < list.length; i++){
+			if(typetag != null && typetag.length == list.length){
+				if(typetag[i] == 's')
+					atoms[i] = Atom.newAtom(list[i]);
+				if(typetag[i] == 'i')
+					atoms[i] = Atom.newAtom(Integer.parseInt(list[i]));
+				if(typetag[i] == 'f')
+					atoms[i] = Atom.newAtom(Float.parseFloat(list[i]));
+			} else {
+				if(list[i].matches("(\\d+)")){
+					atoms[i] = Atom.newAtom(Integer.parseInt(list[i]));
+				}else if(list[i].matches("(\\d+)\\.(\\d+)")){
+					atoms[i] = Atom.newAtom(Float.parseFloat(list[i]));
+				}else{
+					atoms[i] = Atom.newAtom(list[i]);
+				}
+			}
+		}
+		if(tag != null)
+			eventOut(tag, atoms);
+		else 
+			eventOut(atoms);
+	}
+	  
+	public void start(Atom[] dasSkript){
 		if(dasDOMObjekt != null){
 			keyFrames = new NodeIterator(dasDOMObjekt.getElementsByTagName(ELEMENT_KEYFRAME));
 			frames = null;
+			isPlaying = true;
+			clock.delay(0);
+			startTime = (long)clock.getTime();
 		}
 	}
 	
-	private int getTime(Node frame){
+	/**
+	 * checks if the current time has passed the frametime and if it is not to far
+	 * in the future.
+	 * 
+	 * @param current
+	 * @param frame
+	 * @return
+	 */
+	private boolean checkKeyTime(long current, Node frame){
+		long triggerFrameTime = getTime(frame);
+		return (current - pastFrameTime < triggerFrameTime && current > triggerFrameTime)? true: false;
+	}
+	
+	private long getTime(Node frame){
 		if(frame.hasAttributes()){
 			NamedNodeMap dieAttribute = frame.getAttributes();
 			for (int i = 0; i < dieAttribute.getLength(); i++){
@@ -174,34 +278,55 @@ public class XMLRecorder extends MaxObject
 	}
 	
 	
-	private int parseTimeString(String timestring){
-		int time = 0;
+	private long parseTimeString(String timestring){
+		long time = 0;
 		String[] timearray = timestring.split(":");
 		for(int j = 0; j < timearray.length; j++){
 			if(timearray[j].contains("d")){
-				time += Integer.parseInt(timearray[j].substring(0, timearray[j].indexOf("d"))) * 24 * 60 * 60 * 1000;
+				time += Long.parseLong(timearray[j].substring(0, timearray[j].indexOf("d"))) * 24 * 60 * 60 * 1000;
 			}else if(timearray[j].contains("h")){
-				time += Integer.parseInt(timearray[j].substring(0, timearray[j].indexOf("h"))) * 60 * 60 * 1000;
+				time += Long.parseLong(timearray[j].substring(0, timearray[j].indexOf("h"))) * 60 * 60 * 1000;
 			}else if(timearray[j].contains("m")){
-				time += Integer.parseInt(timearray[j].substring(0, timearray[j].indexOf("m"))) * 60 * 1000;
+				time += Long.parseLong(timearray[j].substring(0, timearray[j].indexOf("m"))) * 60 * 1000;
 			}else if(timearray[j].contains("s")){
-				time += Integer.parseInt(timearray[j].substring(0, timearray[j].indexOf("s"))) * 1000;
+				time += Long.parseLong(timearray[j].substring(0, timearray[j].indexOf("s"))) * 1000;
 			}else if(timearray[j].contains(".")){
-				time += (int)(Float.parseFloat(timearray[j]) * 1000f);
+				time += (long)(Float.parseFloat(timearray[j]) * 1000);
 			}else{
 				if(j < timearray.length - 1){ // it must be minutes
-					time += Integer.parseInt(timearray[j]) * 60 * 1000;
+					time += Long.parseLong(timearray[j]) * 60 * 1000;
 				} else if(j > 0 && j == timearray.length - 1){ // it must be seconds
-					time += Integer.parseInt(timearray[j]) * 1000;
+					time += Long.parseLong(timearray[j]) * 1000;
 				} else if(timearray.length == 1){ // it must be milliseconds
-					time += Integer.parseInt(timearray[j]);
+					time += Long.parseLong(timearray[j]);
 				}
 			}
 		}
 		return time;	
 	}
 	
+	private void eventOut(String tag, Atom[] args){
+		outletHigh(0, tag, args);
+	}
+	
+	private void eventOut(Atom[] args){
+		outletHigh(0, args);
+	}
+	
+	private void printTime(long current){
+		outletHigh(1, current);
+	}
+	
+	private void scriptDone(){
+		isPlaying = false;
+		outletHigh(this.getInfoIdx(), "done");
+	}
+	
+	private void fileLoaded(){
+		outletHigh(this.getInfoIdx(), "loaded");
+	}
 
+	
 	protected class NodeIterator{
 		private int currentIndex;
 		private NodeList list;
@@ -226,7 +351,7 @@ public class XMLRecorder extends MaxObject
 		}
 
 		public boolean hasNext(){
-			return (currentIndex + 1 < list.getLength())? true: false;
+			return (hasCurrent() && currentIndex + 1 < list.getLength())? true: false;
 		}
 
 		public Node getNext(){
