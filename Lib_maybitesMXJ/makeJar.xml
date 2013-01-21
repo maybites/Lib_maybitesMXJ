@@ -9,7 +9,7 @@
  		<property name="main.class.name" value=""/>
  		<property name="jar.name" value="maybitesMXJ.jar"/>
  		<property name="export.dir" value="${maybites.mxj.export.dir}"/>
- 		<property name="createJavaDoc" value="1" />
+ 		<property name="createJavaDoc" value="0" />
  		
 		<path id="library-classpath">
 			<fileset dir="${libraryClasspath}" >
