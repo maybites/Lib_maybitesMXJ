@@ -5,13 +5,11 @@
 			Processing.org -> Eclipse Ant Builder for Applets and Applications
  		======================================================================================
  		</description>
- 	    <property name="workspace.location" value="/Users/maf/Arbeiten/02_code/eclipse/git/Lib_maybitesMXJ"/>
-     	<property name="processing.dir" value="/Applications/Processing"/>
         <property name="project.name" value="Lib_maybitesCore"/>
  		<property name="main.class.name" value=""/>
  		<property name="jar.name" value="maybitesMXJ.jar"/>
- 		<property name="export.dir" value="/Users/maybites/Arbeiten/02_code/library/max/maybites/mxj/java"/>
- 		<property name="createJavaDoc" value="0" />
+ 		<property name="export.dir" value="${maybites.mxj.export.dir}"/>
+ 		<property name="createJavaDoc" value="1" />
  		
 		<path id="library-classpath">
 			<fileset dir="${libraryClasspath}" >
@@ -50,11 +48,11 @@
  			 		    <fileset dir="${project.src.dir}"/>
  			 		</copy>
 
-			 		<copy file="${coreJar}"
+			 		<copy file="${maybites.core.jar}"
  			 		    todir="${project.libs.dir}"/>
-			 		<copy file="${MaxJar}"
+			 		<copy file="${maxmsp.max.jar}"
  			 		    todir="${project.libs.dir}"/>
-			 		<copy file="${JitterJar}"
+			 		<copy file="${maxmsp.jitter.jar}"
  			 		    todir="${project.libs.dir}"/>
 
  			 		<copy file="MIT.LICENSE"
