@@ -18,13 +18,13 @@
 		<pathelement location="${maxmsp.jitter.jar}" />
 	</path>
 	
-	<!-- 
+	<!--
  	 		==================================================================
  	 			DO NOT CHANGE BELOW UNLESS YOU KNOW WHAT YOU ARE DOIN
  	 		==================================================================-->
 
 	<property name="project.javadoc.dir" value="javadoc" />
-	<property name="project.bin.dir" value="bin" />
+	<property name="project.bin.dir" value="bin/classes" />
 	<property name="project.src.dir" value="src" />
 	<property name="project.extDev.dir" value="extDev" />
 	<property name="project.extDev.jar.dir" value="extDev/java/library" />
