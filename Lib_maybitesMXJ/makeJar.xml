@@ -27,6 +27,7 @@
 	<property name="project.bin.dir" value="bin" />
 	<property name="project.src.dir" value="src" />
 	<property name="project.extDev.dir" value="extDev" />
+	<property name="project.extDev.jar.dir" value="extDev/java/library" />
 	<property name="project.build.jar.dir" value="bin" />
 	<property name="build.dir" value="build" />
 	<property name="build.library.dir" value="build/java/library" />
@@ -39,14 +40,14 @@
 	<target name="default" description="check conditions">
 		<!-- create jar inside bin-->
 		<antcall target="jar.build" />
-		<copy file="${project.build.jar.dir}/${jar.name}" todir="${build.library.dir}"/>
+		<copy file="${project.build.jar.dir}/${jar.name}" todir="${project.extDev.jar.dir}"/>
 
 		<!-- export library with the whole shebang-->
 		<condition property="makeExport">
 			<equals arg1="${exportLibrary}" arg2="1" />
 		</condition>
 		<antcall target="make.export" />
-
+		
 	</target>
 
 	<target name="make.export" if="makeExport">
