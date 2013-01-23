@@ -1,116 +1,120 @@
 <?xml version="1.0" encoding="UTF-8"?>
- 	<project name="Lib_maybitesMXJ" default="default" basedir=".">
-		<description>
+<project name="Lib_maybitesMXJ" default="default" basedir=".">
+	<description>
  		======================================================================================
 			Processing.org -> Eclipse Ant Builder for Applets and Applications
  		======================================================================================
  		</description>
-        <property name="project.name" value="Lib_maybitesCore"/>
- 		<property name="main.class.name" value=""/>
- 		<property name="jar.name" value="maybitesMXJ.jar"/>
- 		<property name="export.dir" value="${maybites.mxj.export.dir}"/>
- 		<property name="createJavaDoc" value="0" />
- 		
-		<path id="library-classpath">
-			<fileset dir="${libraryClasspath}" >
-				<!-- #### (3) add the jar files that are required for compiling. edit name.
-				 for more include files. duplicate <include name="" /> #### -->
-				<include name="maybitesCore.jar"/>
-				<include name="jitter.jar"/>
-				<include name="max.jar"/>
-			</fileset>
-		</path>
+	<property name="project.name" value="Lib_maybitesCore"/>
+	<property name="main.class.name" value=""/>
+	<property name="jar.name" value="maybitesMXJ.jar"/>
+	<property name="export.dir" value="${maybites.mxj.export.dir}"/>
+	<property name="createJavaDoc" value="1" />
 
- 		<!-- 
+	<path id="library-classpath">
+		<pathelement location="${maybites.core.jar}"/>
+		<pathelement location="${maxmsp.max.jar}"/>
+		<pathelement location="${maxmsp.jitter.jar}"/>
+	</path>
+
+	<!-- 
  		==================================================================
  			DO NOT CHANGE BELOW UNLESS YOU KNOW WHAT YOU ARE DOIN
- 		==================================================================-->		
+ 		==================================================================-->
 
- 		 		<property name="project.javadoc.dir" value="javadoc"/>
- 		 	   	<property name="project.bin.dir" value="bin"/>
-		 	   	<property name="project.src.dir" value="src"/>
-		 	   	<property name="project.libs.dir" value="libs"/>
- 		 	   	<property name="project.build.dir" value="build"/>
- 			   	<property name="project.library.dir" value="build/library"/>
- 			   	<property name="project.reference.dir" value="build/reference"/>
+	<property name="project.javadoc.dir" value="javadoc"/>
+	<property name="project.bin.dir" value="bin"/>
+	<property name="project.src.dir" value="src"/>
+	<property name="project.extDev.dir" value="extDev"/>
+	<property name="project.build.jar.dir" value="extDev/java/library"/>
+	<property name="build.dir" value="build"/>
+	<property name="build.library.dir" value="build/java/library"/>
+	<property name="build.reference.dir" value="build/java/reference"/>
+	<property name="build.source.dir" value="build/java/src"/>
 
- 		 		<property file="${project.javadoc.dir}/building.properties"/>
- 		     	
- 				<target name ="default" description="check conditions">
- 			 		<delete dir="${project.build.dir}"/>
- 					<delete dir="${project.libs.dir}"/>
- 			 			
- 					<mkdir dir="${project.build.dir}"/>
- 					<mkdir dir="${project.library.dir}"/>
- 					<mkdir dir="${project.reference.dir}"/>
- 			 		
- 			 		<copy todir="${project.build.dir}/src">
- 			 		    <fileset dir="${project.src.dir}"/>
- 			 		</copy>
+	<!-- load the javadoc properties -->
+	<property file="${project.javadoc.dir}/building.properties"/>
 
-			 		<copy file="${maybites.core.jar}"
- 			 		    todir="${project.libs.dir}"/>
-			 		<copy file="${maxmsp.max.jar}"
- 			 		    todir="${project.libs.dir}"/>
-			 		<copy file="${maxmsp.jitter.jar}"
- 			 		    todir="${project.libs.dir}"/>
+	<target name ="default" description="check conditions">
+		<!-- remove build directory -->
+		<mkdir dir="${build.dir}"/>
 
- 			 		<copy file="MIT.LICENSE"
- 			 		    todir="${project.build.dir}"/>
- 				
- 					<condition property="makeDoc">
- 						<equals arg1="${createJavaDoc}" arg2="1"/>
- 	 				</condition>
+		<!-- create jar and put into extDev-->
+		<antcall target="jar.build"/>
 
- 					<antcall target="doc.build"/>
- 					<antcall target="jar.build"/>
- 					
-			 		<delete dir="${export.dir}"/>
- 					<mkdir dir="${export.dir}"/>
-   					<copy todir="${export.dir}">
- 						<fileset dir="${project.build.dir}"/>
- 					</copy>
+		<!-- copy extdev to build dir-->
+		<copy todir="${build.dir}">
+			<fileset dir="${project.extDev.dir}"/>
+		</copy>
 
- 		 		</target>
- 		 		
- 				
- 		 		<target name="jar.build">
- 		 			<jar jarfile="${project.library.dir}/${jar.name}">
- 				        <fileset dir="${project.bin.dir}">
- 				        	<include name="**/*.class"/>
- 				        </fileset>
- 					    <manifest>
- 		      				<attribute name="Built-By" value="${user.name}"/>
- 		      				<attribute name="Main-Class" value="${main.class.name}"/>
- 		    			</manifest>
- 					</jar>	
- 		  		</target>
+		<!-- copy source to build dir-->
+		<copy todir="${build.source.dir}">
+			<fileset dir="${project.src.dir}"/>
+		</copy>
 
- 		 		<target name="doc.build" if="makeDoc">
- 		 	    <!-- create the java reference of the library -->
- 			 	    <javadoc bottom="library ${libraryName} by ${author}. ${copyright}"
- 			 	 	     destdir="${project.reference.dir}"
+		<!-- copy license to build dir-->
+		<copy file="MIT.LICENSE" todir="${build.dir}"/>
+
+		<!-- create java doc directory inside build dir-->
+		<mkdir dir="${build.reference.dir}"/>
+
+		<!-- create java doc reference-->
+		<condition property="makeDoc">
+			<equals arg1="${createJavaDoc}" arg2="1"/>
+		</condition>
+		<antcall target="doc.build"/>
+
+		<!-- cleanup export directory-->
+		<delete dir="${export.dir}"/>
+		<mkdir dir="${export.dir}"/>
+
+		<!-- copy build directory to export directory-->
+		<copy todir="${export.dir}">
+			<fileset dir="${build.dir}"/>
+		</copy>
+
+		<!-- remove build directory-->
+		<delete dir="${build.dir}"/>
+	</target>
+
+
+	<target name="jar.build">
+		<jar jarfile="${project.build.jar.dir}/${jar.name}">
+			<fileset dir="${project.bin.dir}">
+				<include name="**/*.class"/>
+			</fileset>
+			<manifest>
+				<attribute name="Built-By" value="${user.name}"/>
+				<attribute name="Main-Class" value="${main.class.name}"/>
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="doc.build" if="makeDoc">
+		<!-- create the java reference of the library -->
+		<javadoc bottom="library ${javadoc.libraryName} by ${javadoc.author}. ${javadoc.copyright}"
+ 			 	 	     destdir="${build.reference.dir}"
  			 	 	     verbose="false"
  			 	 	     stylesheetfile="${project.javadoc.dir}/stylesheet.css"
- 			 	 	     doctitle="Javadocs: ${libraryName}"
+ 			 	 	     doctitle="Javadocs: ${javadoc.libraryName}"
  			 	 	     public="true" version="false"
- 			 	 	     windowtitle="Javadocs: ${libraryName}">
- 			 	      <classpath>
- 			 			<path refid="library-classpath"/>
- 			 	      </classpath>
- 			
- 			 	      <tag name="invisible" scope="all" enabled="false"/>
- 			 	      <tag name="related" scope="all" enabled="false"/>
- 			 	      <tag name="extended" scope="all" enabled="false"/>
- 			 	      <tag name="usage" scope="all" enabled="false"/>
- 			
- 			 	      <taglet name="ExampleTaglet" path="${project.javadoc.dir}/code" />
- 			 	      <fileset dir="${project.src.dir}" defaultexcludes="yes">
- 			 	 	<!-- #### (9) add packages to be added to reference. #### -->
- 			 		<include name="**/*"/>
- 			 	      </fileset>
- 			 	    </javadoc>
- 		 	  	</target>
+ 			 	 	     windowtitle="Javadocs: ${javadoc.libraryName}">
+			<classpath>
+				<path refid="library-classpath"/>
+			</classpath>
 
- 		 	</project>
- 
+			<tag name="invisible" scope="all" enabled="false"/>
+			<tag name="related" scope="all" enabled="false"/>
+			<tag name="extended" scope="all" enabled="false"/>
+			<tag name="usage" scope="all" enabled="false"/>
+
+			<taglet name="ExampleTaglet" path="${project.javadoc.dir}/code" />
+			<fileset dir="${project.src.dir}" defaultexcludes="yes">
+				<!-- #### (9) add packages to be added to reference. #### -->
+				<include name="**/*"/>
+			</fileset>
+		</javadoc>
+	</target>
+
+</project>
+
