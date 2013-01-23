@@ -9,109 +9,115 @@
 	<property name="main.class.name" value=""/>
 	<property name="jar.name" value="maybitesMXJ.jar"/>
 	<property name="export.dir" value="${maybites.mxj.export.dir}"/>
-	<property name="createJavaDoc" value="1" />
-
+	<property name="exportLibrary" value="0" />
+	<property name="createJavaDoc" value="0" />
+	
 	<path id="library-classpath">
-		<pathelement location="${maybites.core.jar}"/>
-		<pathelement location="${maxmsp.max.jar}"/>
-		<pathelement location="${maxmsp.jitter.jar}"/>
+		<pathelement location="${maybites.core.jar}" />
+		<pathelement location="${maxmsp.max.jar}" />
+		<pathelement location="${maxmsp.jitter.jar}" />
 	</path>
-
+	
 	<!-- 
- 		==================================================================
- 			DO NOT CHANGE BELOW UNLESS YOU KNOW WHAT YOU ARE DOIN
- 		==================================================================-->
+ 	 		==================================================================
+ 	 			DO NOT CHANGE BELOW UNLESS YOU KNOW WHAT YOU ARE DOIN
+ 	 		==================================================================-->
 
-	<property name="project.javadoc.dir" value="javadoc"/>
-	<property name="project.bin.dir" value="bin"/>
-	<property name="project.src.dir" value="src"/>
-	<property name="project.extDev.dir" value="extDev"/>
-	<property name="project.build.jar.dir" value="extDev/java/library"/>
-	<property name="build.dir" value="build"/>
-	<property name="build.library.dir" value="build/java/library"/>
-	<property name="build.reference.dir" value="build/java/reference"/>
-	<property name="build.source.dir" value="build/java/src"/>
+	<property name="project.javadoc.dir" value="javadoc" />
+	<property name="project.bin.dir" value="bin" />
+	<property name="project.src.dir" value="src" />
+	<property name="project.extDev.dir" value="extDev" />
+	<property name="project.build.jar.dir" value="bin" />
+	<property name="build.dir" value="build" />
+	<property name="build.library.dir" value="build/java/library" />
+	<property name="build.reference.dir" value="build/java/reference" />
+	<property name="build.source.dir" value="build/java/src" />
 
 	<!-- load the javadoc properties -->
-	<property file="${project.javadoc.dir}/building.properties"/>
+	<property file="${project.javadoc.dir}/building.properties" />
 
-	<target name ="default" description="check conditions">
+	<target name="default" description="check conditions">
+		<!-- create jar inside bin-->
+		<antcall target="jar.build" />
+		<copy file="${project.build.jar.dir}/${jar.name}" todir="${build.library.dir}"/>
+
+		<!-- export library with the whole shebang-->
+		<condition property="makeExport">
+			<equals arg1="${exportLibrary}" arg2="1" />
+		</condition>
+		<antcall target="make.export" />
+
+	</target>
+
+	<target name="make.export" if="makeExport">
+		
 		<!-- remove build directory -->
-		<mkdir dir="${build.dir}"/>
-
-		<!-- create jar and put into extDev-->
-		<antcall target="jar.build"/>
+		<mkdir dir="${build.dir}" />
 
 		<!-- copy extdev to build dir-->
 		<copy todir="${build.dir}">
-			<fileset dir="${project.extDev.dir}"/>
+			<fileset dir="${project.extDev.dir}" />
 		</copy>
 
 		<!-- copy source to build dir-->
 		<copy todir="${build.source.dir}">
-			<fileset dir="${project.src.dir}"/>
+			<fileset dir="${project.src.dir}" />
 		</copy>
 
 		<!-- copy license to build dir-->
-		<copy file="MIT.LICENSE" todir="${build.dir}"/>
+		<copy file="MIT.LICENSE" todir="${build.dir}" />
 
 		<!-- create java doc directory inside build dir-->
-		<mkdir dir="${build.reference.dir}"/>
+		<mkdir dir="${build.reference.dir}" />
 
 		<!-- create java doc reference-->
 		<condition property="makeDoc">
-			<equals arg1="${createJavaDoc}" arg2="1"/>
+			<equals arg1="${createJavaDoc}" arg2="1" />
 		</condition>
-		<antcall target="doc.build"/>
+		<antcall target="doc.build" />
 
 		<!-- cleanup export directory-->
-		<delete dir="${export.dir}"/>
-		<mkdir dir="${export.dir}"/>
+		<delete dir="${export.dir}" />
+		<mkdir dir="${export.dir}" />
 
 		<!-- copy build directory to export directory-->
 		<copy todir="${export.dir}">
-			<fileset dir="${build.dir}"/>
+			<fileset dir="${build.dir}" />
 		</copy>
 
 		<!-- remove build directory-->
-		<delete dir="${build.dir}"/>
+		<delete dir="${build.dir}" />
 	</target>
 
 
 	<target name="jar.build">
 		<jar jarfile="${project.build.jar.dir}/${jar.name}">
 			<fileset dir="${project.bin.dir}">
-				<include name="**/*.class"/>
+				<include name="**/*.class" />
 			</fileset>
 			<manifest>
-				<attribute name="Built-By" value="${user.name}"/>
-				<attribute name="Main-Class" value="${main.class.name}"/>
+				<attribute name="Built-By" value="${user.name}" />
+				<attribute name="Main-Class" value="${main.class.name}" />
 			</manifest>
 		</jar>
 	</target>
 
 	<target name="doc.build" if="makeDoc">
 		<!-- create the java reference of the library -->
-		<javadoc bottom="library ${javadoc.libraryName} by ${javadoc.author}. ${javadoc.copyright}"
- 			 	 	     destdir="${build.reference.dir}"
- 			 	 	     verbose="false"
- 			 	 	     stylesheetfile="${project.javadoc.dir}/stylesheet.css"
- 			 	 	     doctitle="Javadocs: ${javadoc.libraryName}"
- 			 	 	     public="true" version="false"
- 			 	 	     windowtitle="Javadocs: ${javadoc.libraryName}">
+		<javadoc bottom="library ${javadoc.libraryName} by ${javadoc.author}. ${javadoc.copyright}" destdir="${build.reference.dir}" verbose="false" stylesheetfile="${project.javadoc.dir}/stylesheet.css" doctitle="Javadocs: ${javadoc.libraryName}" public="true" version="false" windowtitle="Javadocs: ${javadoc.libraryName}">
 			<classpath>
-				<path refid="library-classpath"/>
+				<path refid="library-classpath" />
 			</classpath>
 
-			<tag name="invisible" scope="all" enabled="false"/>
-			<tag name="related" scope="all" enabled="false"/>
-			<tag name="extended" scope="all" enabled="false"/>
-			<tag name="usage" scope="all" enabled="false"/>
+			<tag name="invisible" scope="all" enabled="false" />
+			<tag name="related" scope="all" enabled="false" />
+			<tag name="extended" scope="all" enabled="false" />
+			<tag name="usage" scope="all" enabled="false" />
 
 			<taglet name="ExampleTaglet" path="${project.javadoc.dir}/code" />
 			<fileset dir="${project.src.dir}" defaultexcludes="yes">
 				<!-- #### (9) add packages to be added to reference. #### -->
-				<include name="**/*"/>
+				<include name="**/*" />
 			</fileset>
 		</javadoc>
 	</target>
