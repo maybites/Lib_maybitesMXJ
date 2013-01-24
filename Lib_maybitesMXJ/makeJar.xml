@@ -40,7 +40,9 @@
 	<target name="default" description="check conditions">
 		<!-- create jar inside bin-->
 		<antcall target="jar.build" />
+		<!--
 		<copy file="${project.build.jar.dir}/${jar.name}" todir="${project.extDev.jar.dir}"/>
+		-->
 
 		<!-- export library with the whole shebang-->
 		<condition property="makeExport">
@@ -59,6 +61,9 @@
 		<copy todir="${build.dir}">
 			<fileset dir="${project.extDev.dir}" />
 		</copy>
+
+		<!-- jar to build dir-->
+		<copy file="${project.build.jar.dir}/${jar.name}" todir="${build.library.dir}"/>
 
 		<!-- copy source to build dir-->
 		<copy todir="${build.source.dir}">
