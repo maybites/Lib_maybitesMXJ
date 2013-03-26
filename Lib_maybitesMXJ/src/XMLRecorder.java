@@ -90,7 +90,7 @@ public class XMLRecorder extends MaxObject
 		if(args.length == 1){
 			delayTime = args[0].toLong();
 		}
-		pastFrameTime = delayTime * 3;
+		pastFrameTime = delayTime * 10;
 		path = null;
 		
 		clock = new MaxClock(new Callback(this, "time"));
@@ -98,7 +98,7 @@ public class XMLRecorder extends MaxObject
 		declareAttribute("path", null, "setpath");
 		declareInlets(new int[]{DataTypes.ALL});
 		declareOutlets(new int[]{DataTypes.ALL, DataTypes.INT});
-		post("XMLRecorder Version 006");
+		post("XMLRecorder Version 008");
 	}
 	
 	public void notifyDeleted(){
@@ -180,11 +180,12 @@ public class XMLRecorder extends MaxObject
 					frames.iterate();
 				}
 				if(frames.hasCurrent()){
-					if((currentTime - lastFrameTime) > getTriggerTime(frames.getCurrent())){
+					long triggerTime = getTriggerTime(frames.getCurrent());
+					if((currentTime - lastFrameTime) >= triggerTime){
 						// send the events out
 						processEvents(new NodeIterator(frames.getCurrent().getChildNodes()));
 						frames.iterate(); // and get the next frame
-						lastFrameTime = currentTime;
+						lastFrameTime = lastFrameTime + triggerTime;
 					}
 				} else { // if there are no more frames
 					frames = null; 
@@ -237,9 +238,9 @@ public class XMLRecorder extends MaxObject
 				if(typetag[i] == 'f')
 					atoms[i] = Atom.newAtom(Float.parseFloat(list[i]));
 			} else {
-				if(list[i].matches("(\\d+)")){
+				if(list[i].matches("[-,+]*(\\d+)")){
 					atoms[i] = Atom.newAtom(Integer.parseInt(list[i]));
-				}else if(list[i].matches("(\\d+)\\.(\\d+)")){
+				}else if(list[i].matches("[-,+]*(\\d+)\\.(\\d+)")){
 					atoms[i] = Atom.newAtom(Float.parseFloat(list[i]));
 				}else{
 					atoms[i] = Atom.newAtom(list[i]);
@@ -262,7 +263,8 @@ public class XMLRecorder extends MaxObject
 	 */
 	private boolean checkTrigger(long current, Node frame){
 		long triggerFrameTime = getTriggerTime(frame);
-		return (current - pastFrameTime < triggerFrameTime && current > triggerFrameTime)? true: false;
+		return (current >= triggerFrameTime)? true: false;
+//		return (current - pastFrameTime < triggerFrameTime && current >= triggerFrameTime)? true: false;
 	}
 	
 	private long getTriggerTime(Node frame){
@@ -311,24 +313,24 @@ public class XMLRecorder extends MaxObject
 	}
 	
 	private void eventOut(String tag, Atom[] args){
-		outletHigh(0, tag, args);
+		outlet(0, tag, args);
 	}
 	
 	private void eventOut(Atom[] args){
-		outletHigh(0, args);
+		outlet(0, args);
 	}
 	
 	private void printTime(long current){
-		outletHigh(1, current);
+		outlet(1, current);
 	}
 	
 	private void scriptDone(){
 		clock.unset();
-		outletHigh(this.getInfoIdx(), "done");
+		outlet(this.getInfoIdx(), "done");
 	}
 	
 	private void fileLoaded(){
-		outletHigh(this.getInfoIdx(), "loaded");
+		outlet(this.getInfoIdx(), "loaded");
 	}
 
 	
