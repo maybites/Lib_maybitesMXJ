@@ -25,6 +25,8 @@ package ch.maybites.mxj.utils.pattr;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import ch.maybites.tools.Debugger;
+
 public class LinkCallback {
 
 	private Method getter;
@@ -58,6 +60,7 @@ public class LinkCallback {
 				setter.invoke(client, _value);
 				value = _value;
 			} catch (Exception e) {
+				Debugger.error(getClass(), "Setter invoke failed. Address:"+address+" | Client:" + client.getClass().getName() + " | Method:"+setter.getName());
 				e.printStackTrace();
 			}
 		}

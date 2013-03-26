@@ -55,12 +55,12 @@ public class PattrStore{
 	}
 
 	public void register(String _storename) throws PattrException{
+		storename = _storename;
 		try{
 			publisher.registerStore(this, _storename);
 		} catch(DynException e){
 			throw new PattrException(e.getMessage());
 		}
-		storename = _storename;
 	}
 		
 	public String getStoreName(){
@@ -121,16 +121,21 @@ public class PattrStore{
 		}
 		
 		public void subscriptionConnected(String distributor, DynSubscription subscription) {
-			connections.add((LinkCallback) subscription.getCallbackObject());
+			LinkCallback link = (LinkCallback) subscription.getCallbackObject();
+			Debugger.verbose("PattrStore", storename + " connected to subscription '"+link.getAddress()+"'");
+			connections.add(link);
 		}
 
 		public void subscriptionDisconnected(String distributor, DynSubscription subscription) {
-			connections.remove((LinkCallback) subscription.getCallbackObject());
+			LinkCallback link = (LinkCallback) subscription.getCallbackObject();
+			Debugger.verbose("PattrStore", storename + " disconnected from subscription '"+link.getAddress()+"'");
+			connections.remove(link);
 		}
 
 		public boolean subscriptionCallback(String distributor, DynSubscription subscription) {
 			LinkCallback conn = (LinkCallback) subscription.getCallbackObject();
 			callback.setAddressValue(conn.getAddress(), conn.get());
+			Debugger.verbose("PattrStore", storename + " subscriptionCallback: address:" + conn.getAddress() + " value:" +conn.get());
 			return true;
 		}
 	}
