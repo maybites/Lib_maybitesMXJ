@@ -9,6 +9,12 @@ import com.cycling74.max.DataTypes;
 import com.cycling74.max.MaxObject;
 
 
+/**
+ * Dysfunctional - can be removed...
+ * @author maybites
+ *
+ */
+@Deprecated
 public class JStoreTest extends MaxObject implements DynSubscriber {
 
 	String store;
@@ -29,10 +35,10 @@ public class JStoreTest extends MaxObject implements DynSubscriber {
 	
 	public void bang(){
 		try{
-			val1 = PattrSystem.getEnv().createLink(this, store, "radio", this, "getValue1", "setValue1");
-			val2 = PattrSystem.getEnv().createLink(this, store, "soap", this, "getValue2", "setValue2");
-			val3 = PattrSystem.getEnv().createLink(this, store, "ui::radio", this, "getValue3", "setValue3");
-			val4 = PattrSystem.getEnv().createLink(this, store, "ui::soap", this, "getValue4", "setValue4");
+			val1 = PattrSystem.getEnv().createLink(this, store, this, "getValue1", "setValue1");
+			val2 = PattrSystem.getEnv().createLink(this, store, this, "getValue2", "setValue2");
+			val3 = PattrSystem.getEnv().createLink(this, store, this, "getValue3", "setValue3");
+			val4 = PattrSystem.getEnv().createLink(this, store, this, "getValue4", "setValue4");
 			val1.subscribe();
 			val2.subscribe();
 			val3.subscribe();

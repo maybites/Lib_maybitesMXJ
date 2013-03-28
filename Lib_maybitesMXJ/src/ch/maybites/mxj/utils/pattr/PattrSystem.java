@@ -49,7 +49,6 @@ public class PattrSystem{
 	 * 
 	 * @param registrar
 	 * @param storename the pattr storage address
-	 * @param address the parameter address
 	 * @param listener the listeners instance
 	 * @param getMethod the getter method which has to return a float
 	 * @param setMethod the setter method which has to expect a float
@@ -59,20 +58,19 @@ public class PattrSystem{
 	public DynSubscription createLink(
 			DynSubscriber registrar,
 			String storename, 
-			String address, 
 			Object listener, 
 			String getMethod, 
 			String setMethod) throws PattrException{
 
-		return factory.create(registrar, storename, new LinkCallback(address, listener, getMethod, setMethod));
+		return factory.create(registrar, storename, new LinkCallback(listener, getMethod, setMethod));
 	}
 	
 	public void removeLinks(DynSubscriber registrar){
 		factory.unsubscribe(registrar);
 	}
 	
-	protected DynPublication registerStore(DynPublisher store, String storename){
-		return factory.create(store, storename, null);
+	protected DynPublication registerStore(DynPublisher store, String storename, PattrCallback pattr){
+		return factory.create(store, storename, pattr);
 	}
 	
 	protected void removeStore(PattrStore store){

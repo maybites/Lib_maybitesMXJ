@@ -90,7 +90,7 @@ public class PattrStore{
 		pattrClients.clear();
 	}
 	
-	protected class StorePublisher implements DynPublisher{
+	protected class StorePublisher implements DynPublisher, PattrCallback{
 		DynPublication publication;
 		ArrayList<LinkCallback> connections;
 		
@@ -108,7 +108,8 @@ public class PattrStore{
 			if(publication != null){
 				publication.recall();
 			}
-			publication = PattrSystem.getEnv().registerStore(this, _storename);
+			Debugger.verbose("PattrStore[", storename + "] published store");
+			publication = PattrSystem.getEnv().registerStore(this, _storename, this);
 			publication.publish();
 //			Debugger.verbose("PattrStore", "Published Object: " + _storename);
 		}
@@ -122,21 +123,23 @@ public class PattrStore{
 		
 		public void subscriptionConnected(String distributor, DynSubscription subscription) {
 			LinkCallback link = (LinkCallback) subscription.getCallbackObject();
-			Debugger.verbose("PattrStore", storename + " connected to subscription '"+link.getAddress()+"'");
+			Debugger.verbose("PattrStore[", storename + "] connected to subscription");
 			connections.add(link);
 		}
 
 		public void subscriptionDisconnected(String distributor, DynSubscription subscription) {
 			LinkCallback link = (LinkCallback) subscription.getCallbackObject();
-			Debugger.verbose("PattrStore", storename + " disconnected from subscription '"+link.getAddress()+"'");
+			Debugger.verbose("PattrStore[", storename + "] disconnected from subscription");
 			connections.remove(link);
 		}
 
 		public boolean subscriptionCallback(String distributor, DynSubscription subscription) {
-			LinkCallback conn = (LinkCallback) subscription.getCallbackObject();
-			callback.setAddressValue(conn.getAddress(), conn.get());
-			Debugger.verbose("PattrStore", storename + " subscriptionCallback: address:" + conn.getAddress() + " value:" +conn.get());
 			return true;
+		}
+
+		public void setAddressValue(String address, float value) {
+			clientEvent(address, value);
+			callback.setAddressValue(address, value);
 		}
 	}
 

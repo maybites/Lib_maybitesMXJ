@@ -33,44 +33,41 @@ public class LinkCallback {
 	private Method setter;
 
 	private Object client;
-	private String address;
-	
-	private float value = 0;
-	
-	public LinkCallback(String _address, Object _client, String _getter, String _setter) throws PattrException{
+		
+	public LinkCallback(Object _client, String _getter, String _setter) throws PattrException{
 		client = _client;
-		address = _address;
 		try{
 			if(_getter != null)
-				getter = _client.getClass().getDeclaredMethod(_getter, new Class[] {});
+				getter = _client.getClass().getDeclaredMethod(_getter, new Class[] {String.class});
 			if(_setter != null)
-				setter = _client.getClass().getDeclaredMethod(_setter, new Class[] {Float.TYPE});	
+				setter = _client.getClass().getDeclaredMethod(_setter, new Class[] {String.class, Float.TYPE});	
+		
+			if(!getter.isAccessible())
+				getter.setAccessible(true);
+			if(!setter.isAccessible())
+				setter.setAccessible(true);
+			
 		} catch (Exception e){
 			throw new PattrException("Check if you listener method has the specifies getter ["+_getter+"] and setter ["+_setter+"] methods.");
 		}
 	}
-	
-	public String getAddress(){
-		return address;
-	}
-	
+		
 	protected void set(String _address, float _value){
-		if(_address.equals(address) && setter != null && value != _value){
+		if(setter != null){
 			try {
-				setter.invoke(client, _value);
-				value = _value;
+				setter.invoke(client, _address, _value);
 			} catch (Exception e) {
-				Debugger.error(getClass(), "Setter invoke failed. Address:"+address+" | Client:" + client.getClass().getName() + " | Method:"+setter.getName());
+				Debugger.error(getClass(), "Setter invoke failed. Address:"+_address+" | Client:" + client.getClass().getName() + " | Method:"+setter.getName());
 				e.printStackTrace();
 			}
 		}
 	}
 
-	protected float get(){
+	protected float get(String _address){
 		float ret = 0.0f;
 		if(getter != null){
 			try {
-				ret = ((Float)getter.invoke(client, null)).floatValue();
+				ret = ((Float)getter.invoke(client, _address)).floatValue();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
