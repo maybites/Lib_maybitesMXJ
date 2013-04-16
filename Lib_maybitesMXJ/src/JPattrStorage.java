@@ -61,9 +61,11 @@ public class JPattrStorage extends MaxObject implements PattrCallback{
 	public void clientlist(Atom[] args){
 		if(getInlet() == PATTR_INLET){
 			if(args.length == 1){
-				if(args[0].toString().equals("done"))
+				if(args[0].toString().equals("done")){
 					notifylisteners();
-				else
+					// lets the pattrStorage send all the clients values
+					outlet(PATTR_OUTLET, "dump"); 
+				}else
 					storage.addClient(args[0].toString());
 			}
 		}
