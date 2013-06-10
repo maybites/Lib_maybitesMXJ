@@ -84,10 +84,10 @@ public class JPattrStorage extends MaxObject implements PattrCallback{
 	}
 
 	private void message(String message, Atom[] args){
-		post("I received a '" + message + "' message.");
+		//post("I received a '" + message + "' message.");
 		if (args.length > 0)
 		{
-			post("It has the following arguments: [" + args.length + "]" );
+			/**post("It has the following arguments: [" + args.length + "]" );
 			for (int i=0;i<args.length;i++){
 				if(args[i].isFloat())
 					post("Float: " + args[i].toFloat());
@@ -96,6 +96,7 @@ public class JPattrStorage extends MaxObject implements PattrCallback{
 				if(args[i].isFloat())
 					post("String: " + args[i].toString());
 			}
+			**/
 		}
 
 	}
@@ -103,7 +104,7 @@ public class JPattrStorage extends MaxObject implements PattrCallback{
 	private void notifylisteners(){
 		ArrayList<String> clients = storage.getClients();
 		for(int i = 0; i < clients.size(); i++){
-			post("registered: " + clients.get(i));
+			Debugger.verbose("JPattrStorage", "registered: " + clients.get(i));
 		}
 	}
 
