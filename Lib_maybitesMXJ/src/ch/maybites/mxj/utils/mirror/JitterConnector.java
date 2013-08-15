@@ -36,11 +36,16 @@ public class JitterConnector {
 	private JitterMirror max;	
 	private Atom[] response;
 	
+	public boolean isInitialized = false;
+	
 	public JitterConnector(){
 	}
 	
 	protected final void init(JitterMirror _max){
-		max = _max;
+		if(!isInitialized){
+			max = _max;
+			isInitialized = true;
+		}
 	}
 	
 	/**
