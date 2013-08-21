@@ -38,14 +38,9 @@ public class JitterConnector {
 	
 	public boolean isInitialized = false;
 	
-	public JitterConnector(){
-	}
-	
-	protected final void init(JitterMirror _max){
-		if(!isInitialized){
-			max = _max;
-			isInitialized = true;
-		}
+	public JitterConnector(JitterMirror _max){
+		max = _max;
+		isInitialized = true;
 	}
 	
 	/**

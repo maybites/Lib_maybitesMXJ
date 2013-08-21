@@ -52,22 +52,14 @@ public class JitterMirror extends MaxObject{
 	 * @param args
 	 */
 	public JitterMirror(Atom args[]){
-		connector = new JitterConnector();
 
 		declareInlets(new int[]{ DataTypes.ALL, DataTypes.ALL, DataTypes.ALL});
 		declareOutlets(new int[]{ DataTypes.ALL, DataTypes.ALL, DataTypes.ALL});
 		setInletAssist(new String[] { "bang to initialize",  "messages to jitter object", "connected to right outlet of jitterobject"});
 		setOutletAssist(new String[] { "messages from this object",  "messages from jitter object", "connected to left inlet of jitterobject"});
 		createInfoOutlet(false);
-	}
 
-	/**
-	 * This Method needs to be called by a child class
-	 */
-	public void bang(){
-		if(getInlet() == MAIN_INLET){
-			connector.init(this);
-		}
+		connector = new JitterConnector(this);
 	}
 
 	/**
