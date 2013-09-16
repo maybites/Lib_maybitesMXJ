@@ -47,7 +47,8 @@ public class JPattrStorage extends MaxObject implements PattrCallback{
 			error("JPattrStore: Address '"+storename+"' already taken.");
 		}
 		// sets the pattrStorage to send all changes of the clients
-		outlet(PATTR_OUTLET, "outputmode", Atom.newAtom(1)); 
+		outlet(PATTR_OUTLET, "changemode", Atom.newAtom(1)); 
+		outlet(PATTR_OUTLET, "outputmode", Atom.newAtom(2)); 
 		// lets the pattrStorage send all the clients names
 		outlet(PATTR_OUTLET, "getclientlist"); 
 	}

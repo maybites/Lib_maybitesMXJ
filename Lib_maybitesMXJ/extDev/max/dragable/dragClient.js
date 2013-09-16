@@ -42,6 +42,17 @@ function init(){
 		//post("my patcher's box position is",this.patcher.box.rect + "\n");
 		//myBoxRect = this.patcher.box.rect;
 	}
+	
+	var firstObject = this.patcher.firstobject;
+	post("found firstObject: " + firstObject.varname  +  "\n");
+	while(firstObject != null){
+		if(firstObject.varname.indexOf("inlet") == 0 || firstObject.varname.indexOf("outlet") == 0){
+			var scriptname = firstObject.varname;
+			var type = scriptname.substring(scriptname.indexOf("[") + 1, scriptname.indexOf("]"));
+			post("found bang with scriptname: " + scriptname + " with type: " + type + "\n");
+		}
+		firstObject = firstObject.nextobject;
+	}
 }
 
 function outlet(n, i, t){
