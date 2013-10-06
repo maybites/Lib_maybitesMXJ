@@ -64,7 +64,19 @@ public class JitterObjectArray {
 		}
 		return false;
 	}
-	
+
+	/**
+	 * enables the object with the specified context
+	 * @param _context
+	 * @param _enable 1 / 0
+	 */
+	public void enable(String _context, int _enable){
+		if(array.containsKey(_context)){
+			JitterObject next = array.get(_context);
+			next.call("enable", _enable);
+		}
+	}
+
 	/**
 	 * Calls all the JitterObject inside this Array
 	 * @param messagename
