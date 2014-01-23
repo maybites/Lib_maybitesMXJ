@@ -16,31 +16,14 @@ import ch.maybites.tools.threedee.*;
 
 public class KinectClient extends MaxObject implements KinectClientListener{
 
-	private String ipaddress;
-	private int port;
-
 	KinectTCPClientThread connection;
 
 	public KinectClient(Atom args[]){
-		if(args.length < 1){
-			this.bail("KinectClient: requires a local port number");
-		}
-		port = args[0].toInt();
-
-		declareAttribute("port", null, "setport");
 		declareInlets(new int[]{ DataTypes.ALL, DataTypes.ALL});
 		declareOutlets(new int[]{ DataTypes.ALL, DataTypes.ALL});
 		createInfoOutlet(false);
 	}
-	
-	public void setaddress(String _address){
-		ipaddress = _address;
-	}
-	
-	public void setport(int _port){
-		port = _port;
-	}
-	
+
 	/**
 	 * Open with an remote IP-address and a remote Port
 	 * @param args
@@ -49,8 +32,7 @@ public class KinectClient extends MaxObject implements KinectClientListener{
 		if(args.length == 2){
 			if(connection == null){
 				try {
-					connection = new KinectTCPClientThread(this, args[0].getString(), args[1].getInt(), port);
-					post("KinectClient starts tcp-client on port: " + port);
+					connection = new KinectTCPClientThread(this, args[0].getString(), args[1].getInt());
 					connection.start();
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -61,8 +43,10 @@ public class KinectClient extends MaxObject implements KinectClientListener{
 
 	public void close(){
 		if(connection != null){
-			post("KinectClient attempts to closing tcp-client port on: " + port);
-			connection.close();
+			if(connection.isAlive()){
+				post("KinectClient attempts to closing connection...");
+				connection.close();
+			}
 			connection = null;
 		}
 	}
