@@ -44,7 +44,7 @@
 		<antcall target="jar.build" />
 		
 		<!-- jar to export dir-->
-			<copy file="${project.jar.build.dir}/${jar.name}" todir="${jar.export1.dir}"/>
+		<copy file="${project.jar.build.dir}/${jar.name}" todir="${jar.export1.dir}"/>
 
 		<!-- export library with the whole shebang-->
 		<condition property="makeExport">
