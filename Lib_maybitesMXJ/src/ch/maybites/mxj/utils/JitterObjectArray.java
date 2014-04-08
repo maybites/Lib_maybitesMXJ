@@ -136,5 +136,12 @@ public class JitterObjectArray {
 			i.next().call(messagename, values);
 		}
 	}
+
+	public void call(String messagename, float f) {
+		Iterator<JitterObject> i = array.values().iterator();
+		while(i.hasNext()){
+			i.next().call(messagename, f);
+		}
+	}
 	
 }
