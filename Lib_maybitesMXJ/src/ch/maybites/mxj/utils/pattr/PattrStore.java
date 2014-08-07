@@ -37,8 +37,6 @@ import com.cycling74.max.Callback;
 
 public class PattrStore{
 
-	ArrayList<String> pattrClients;
-	
 	private String storename;
 	private PattrCallback callback;
 	
@@ -46,12 +44,10 @@ public class PattrStore{
 	
 	public PattrStore(){
 		publisher = new StorePublisher();
-		pattrClients = new ArrayList<String>();
 	}
 
 	public void init(PattrCallback _callback){
 		callback = _callback;
-		pattrClients.clear();
 	}
 
 	public void register(String _storename) throws PattrException{
@@ -67,27 +63,20 @@ public class PattrStore{
 		return storename;
 	}
 	
-	public ArrayList<String> getClients(){
-		return pattrClients;
-	}
-	
 	public void addClient(String clientAddress){
-		pattrClients.add(clientAddress);
+		Debugger.verbose("PattrStorage[" + storename + "]", "registered: " + clientAddress);
 	}
 	
 	public boolean clientEvent(String event, float value){
-		if(pattrClients.contains(event) && publisher != null){
-			publisher.clientEvent(event, value);
-		}
+		publisher.clientEvent(event, value);
 		return false;
 	}
-		
+
 	/**
 	 * is beeing called if the mxj-wrapper is deleted
 	 */
 	public void notifyDeleted(){
 		publisher.notifyDeleted();
-		pattrClients.clear();
 	}
 	
 	protected class StorePublisher implements DynPublisher, PattrCallback{
@@ -108,7 +97,7 @@ public class PattrStore{
 			if(publication != null){
 				publication.recall();
 			}
-			Debugger.verbose("PattrStore[", storename + "] published store");
+			Debugger.verbose("PattrStore["+ storename + "]"," published store");
 			publication = PattrSystem.getEnv().registerStore(this, _storename, this);
 			publication.publish();
 //			Debugger.verbose("PattrStore", "Published Object: " + _storename);
@@ -123,13 +112,14 @@ public class PattrStore{
 		
 		public void subscriptionConnected(String distributor, DynSubscription subscription) {
 			LinkCallback link = (LinkCallback) subscription.getCallbackObject();
-			Debugger.verbose("PattrStore[", storename + "] connected to subscription");
+			Debugger.verbose("PattrStore["+ storename + "]"," connected to subscription");
 			connections.add(link);
+			dumpAllValues();
 		}
 
 		public void subscriptionDisconnected(String distributor, DynSubscription subscription) {
 			LinkCallback link = (LinkCallback) subscription.getCallbackObject();
-			Debugger.verbose("PattrStore[", storename + "] disconnected from subscription");
+			Debugger.verbose("PattrStore["+ storename + "]"," disconnected from subscription");
 			connections.remove(link);
 		}
 
@@ -137,6 +127,10 @@ public class PattrStore{
 			return true;
 		}
 
+		public void dumpAllValues(){
+			callback.dumpAllValues();
+		}
+		
 		public void setAddressValue(String address, float value) {
 			clientEvent(address, value);
 			callback.setAddressValue(address, value);

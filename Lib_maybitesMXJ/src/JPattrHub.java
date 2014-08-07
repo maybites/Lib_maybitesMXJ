@@ -99,10 +99,12 @@ public class JPattrHub extends MaxObject implements PattrCallback{
 	}
 
 	private void notifylisteners(){
-		ArrayList<String> clients = storage.getClients();
-		for(int i = 0; i < clients.size(); i++){
-			Debugger.verbose("PattrHub: " + storename," has registered: " + clients.get(i));
-		}
+	}
+
+	@Override
+	public void dumpAllValues() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

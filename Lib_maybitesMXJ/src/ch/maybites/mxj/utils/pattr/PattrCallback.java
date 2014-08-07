@@ -26,4 +26,6 @@ public interface PattrCallback {
 
 	public void setAddressValue(String address, float value);
 	
+	public void dumpAllValues();
+	
 }

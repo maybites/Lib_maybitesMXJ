@@ -58,12 +58,15 @@ public class JPattrStorage extends MaxObject implements PattrCallback{
 		//this.outlet(PATTR_OUTLET, new Atom[]{Atom.newAtom((String)argObjectArray[0]), Atom.newAtom((Float)argObjectArray[1])});
 	}
 
-
+	/**
+	 * this method is called for the report of the current client list,
+	 * 	cause by the "getclientlist" message inside the bang-method
+	 * @param args
+	 */
 	public void clientlist(Atom[] args){
 		if(getInlet() == PATTR_INLET){
 			if(args.length == 1){
 				if(args[0].toString().equals("done")){
-					notifylisteners();
 					// lets the pattrStorage send all the clients values
 					outlet(PATTR_OUTLET, "dump"); 
 				}else
@@ -72,6 +75,10 @@ public class JPattrStorage extends MaxObject implements PattrCallback{
 		}
 	}
 
+	/**
+	 * This method is called for the report of the current clients values, 
+	 * 	caused by the "dump" message inside the clientlist-method
+	 */
 	public void anything(String message, Atom[] args){
 		if(getInlet() == PATTR_INLET){
 			if(args.length == 1){
@@ -84,6 +91,10 @@ public class JPattrStorage extends MaxObject implements PattrCallback{
 		}
 	}
 
+	public void dumpAllValues(){
+		outlet(PATTR_OUTLET, "dump"); 
+	}
+	
 	private void message(String message, Atom[] args){
 		//post("I received a '" + message + "' message.");
 		if (args.length > 0)
@@ -100,13 +111,6 @@ public class JPattrStorage extends MaxObject implements PattrCallback{
 			**/
 		}
 
-	}
-
-	private void notifylisteners(){
-		ArrayList<String> clients = storage.getClients();
-		for(int i = 0; i < clients.size(); i++){
-			Debugger.verbose("JPattrStorage", "registered: " + clients.get(i));
-		}
 	}
 
 }
