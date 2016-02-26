@@ -9,7 +9,7 @@
 			"modernui" : 1
 		}
 ,
-		"rect" : [ 8.0, 51.0, 574.0, 195.0 ],
+		"rect" : [ 8.0, 51.0, 657.0, 195.0 ],
 		"bglocked" : 0,
 		"openinpresentation" : 0,
 		"default_fontsize" : 12.0,
@@ -58,7 +58,7 @@
 					"numinlets" : 1,
 					"numoutlets" : 4,
 					"outlettype" : [ "bang", "bang", "", "int" ],
-					"patching_rect" : [ 266.0, 94.75, 274.0, 20.0 ]
+					"patching_rect" : [ 251.0, 94.75, 316.0, 20.0 ]
 				}
 
 			}
@@ -84,9 +84,9 @@
 					"maxclass" : "comment",
 					"numinlets" : 1,
 					"numoutlets" : 0,
-					"patching_rect" : [ 262.0, 94.75, 278.0, 20.0 ],
+					"patching_rect" : [ 251.0, 94.75, 316.0, 20.0 ],
 					"style" : "",
-					"text" : "https://github.com/maybites/Lib_maybitesMXJ/wiki",
+					"text" : "https://github.com/maybites/Lib_QueScript/wiki/QueScript",
 					"textcolor" : [ 0.4, 0.4, 0.8, 1.0 ]
 				}
 
@@ -97,14 +97,14 @@
 					"fontsize" : 12.0,
 					"hidden" : 1,
 					"id" : "obj-68",
-					"linecount" : 2,
+					"linecount" : 3,
 					"maxclass" : "message",
 					"numinlets" : 2,
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
-					"patching_rect" : [ 245.0, 131.5, 392.0, 35.0 ],
+					"patching_rect" : [ 245.0, 131.5, 316.0, 49.0 ],
 					"style" : "",
-					"text" : ";\rmax launch_browser https://github.com/maybites/Lib_maybitesMXJ/wiki"
+					"text" : ";\rmax launch_browser https://github.com/maybites/Lib_QueScript/wiki/QueScript"
 				}
 
 			}
@@ -129,7 +129,7 @@
 					"destination" : [ "obj-68", 0 ],
 					"disabled" : 0,
 					"hidden" : 1,
-					"midpoints" : [ 360.5, 120.75, 254.5, 120.75 ],
+					"midpoints" : [ 359.5, 120.75, 254.5, 120.75 ],
 					"source" : [ "obj-15", 1 ]
 				}
 
