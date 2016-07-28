@@ -18,8 +18,9 @@
 		<pathelement location="${maxmsp.jitter.jar}" />
 	</path>
 
-	<property name="jar.export1.dir" value="${project.bin.dir}/../../java-classes" />
-
+	<property name="export1.dir" value="${project.bin.dir}/../../java-classes/lib" />
+	<property name="export2.dir" value="${maybites.sparck.export.dir}/lib" />
+	
 	<!--
  	 		==================================================================
  	 			DO NOT CHANGE BELOW UNLESS YOU KNOW WHAT YOU ARE DOIN
@@ -43,9 +44,19 @@
 		<!-- create jar inside bin-->
 		<antcall target="jar.build" />
 		
-		<!-- jar to export dir-->
-		<copy file="${project.jar.build.dir}/${jar.name}" todir="${jar.export1.dir}"/>
-
+ 		<!-- classes to export dir-->
+		<copy todir="${export1.dir}">
+			<resources>
+			  <file file="${project.jar.build.dir}/${jar.name}"/>
+			</resources>
+		 </copy>
+		<copy todir="${export2.dir}">
+			<resources>
+			  <file file="${project.jar.build.dir}/${jar.name}"/>
+			</resources>
+		 </copy>
+		
+		
 		<!-- export library with the whole shebang-->
 		<condition property="makeExport">
 			<equals arg1="${exportLibrary}" arg2="1" />
