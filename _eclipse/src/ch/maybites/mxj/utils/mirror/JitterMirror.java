@@ -22,6 +22,9 @@
 
 package ch.maybites.mxj.utils.mirror;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+
 import com.cycling74.jitter.JitterEvent;
 import com.cycling74.max.Atom;
 import com.cycling74.max.DataTypes;
