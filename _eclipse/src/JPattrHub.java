@@ -6,9 +6,9 @@ import ch.maybites.mxj.utils.pattr.PattrSystem;
 import ch.maybites.mxj.utils.pattr.PattrCallback;
 import ch.maybites.mxj.utils.pattr.PattrException;
 import ch.maybites.mxj.utils.pattr.PattrStore;
-import ch.maybites.tools.Debugger;
 import ch.maybites.tools.math.la.*;
 import ch.maybites.tools.threedee.*;
+import ch.maybites.utils.Debug;
 /**
  * @author Martin Froehlich
  *

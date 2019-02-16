@@ -6,9 +6,9 @@ import ch.maybites.mxj.utils.pattr.PattrSystem;
 import ch.maybites.mxj.utils.pattr.PattrCallback;
 import ch.maybites.mxj.utils.pattr.PattrException;
 import ch.maybites.mxj.utils.pattr.PattrStore;
-import ch.maybites.tools.Debugger;
 import ch.maybites.tools.math.la.*;
 import ch.maybites.tools.threedee.*;
+import ch.maybites.utils.Debug;
 /**
  * @author Martin Froehlich
  *
@@ -24,7 +24,7 @@ public class JPattrStorage extends MaxObject implements PattrCallback{
 
 	public JPattrStorage(Atom args[]){
 		if(args.length < 1){
-			Debugger.info("JPattrStorage", "no address set. use 'setaddress'. BEWARE: all messages are discarded as long no address is set");
+			Debug.info("JPattrStorage", "no address set. use 'setaddress'. BEWARE: all messages are discarded as long no address is set");
 		} else {
 			storename = args[0].toString();
 		}

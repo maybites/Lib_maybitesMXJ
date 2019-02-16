@@ -24,7 +24,7 @@ package ch.maybites.mxj.utils.pattr;
 
 import java.util.*;
 
-import ch.maybites.tools.Debugger;
+import ch.maybites.utils.Debug;
 import ch.maybites.utils.dyndist.DynDistributor;
 import ch.maybites.utils.dyndist.DynPublication;
 import ch.maybites.utils.dyndist.DynPublisher;

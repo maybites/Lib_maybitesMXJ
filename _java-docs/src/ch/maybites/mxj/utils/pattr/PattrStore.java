@@ -27,7 +27,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 
-import ch.maybites.tools.Debugger;
+import ch.maybites.utils.Debug;
 import ch.maybites.utils.dyndist.DynException;
 import ch.maybites.utils.dyndist.DynPublication;
 import ch.maybites.utils.dyndist.DynPublisher;
@@ -64,7 +64,7 @@ public class PattrStore{
 	}
 	
 	public void addClient(String clientAddress){
-		Debugger.verbose("PattrStorage[" + storename + "]", "registered: " + clientAddress);
+		Debug.verbose("PattrStorage[" + storename + "]", "registered: " + clientAddress);
 	}
 	
 	public boolean clientEvent(String event, float value){
@@ -97,7 +97,7 @@ public class PattrStore{
 			if(publication != null){
 				publication.recall();
 			}
-			Debugger.verbose("PattrStore["+ storename + "]"," published store");
+			Debug.verbose("PattrStore["+ storename + "]"," published store");
 			publication = PattrSystem.getEnv().registerStore(this, _storename, this);
 			publication.publish();
 //			Debugger.verbose("PattrStore", "Published Object: " + _storename);
@@ -112,14 +112,14 @@ public class PattrStore{
 		
 		public void subscriptionConnected(String distributor, DynSubscription subscription) {
 			LinkCallback link = (LinkCallback) subscription.getCallbackObject();
-			Debugger.verbose("PattrStore["+ storename + "]"," connected to subscription");
+			Debug.verbose("PattrStore["+ storename + "]"," connected to subscription");
 			connections.add(link);
 			dumpAllValues();
 		}
 
 		public void subscriptionDisconnected(String distributor, DynSubscription subscription) {
 			LinkCallback link = (LinkCallback) subscription.getCallbackObject();
-			Debugger.verbose("PattrStore["+ storename + "]"," disconnected from subscription");
+			Debug.verbose("PattrStore["+ storename + "]"," disconnected from subscription");
 			connections.remove(link);
 		}
 
