@@ -8,14 +8,25 @@ import ch.maybites.utils.DebugLogger;
 
 public class Debugger extends MaxObject implements DebugLogger{
 	
+	private boolean print = false;
+	
 	public Debugger(Atom[] args){
 		Debug.setLevelToError();
 		declareOutlets(new int[]{DataTypes.ALL, DataTypes.ALL});
 		this.setOutletAssist(new String[]{"info messages", "error messages"});
+		this.declareAttribute("print", "getprint", "setprint");
 	}
 	
 	public void loadbang(){
 		Debug.getInstance().setOutputObject(this);
+	}
+
+	public void getprint(){
+		outlet(2, "print", print);
+	}
+
+	public void setprint(int i){
+		print = (i == 0)?false:true;
 	}
 
 	public void debugger(String _level){
@@ -49,6 +60,8 @@ public class Debugger extends MaxObject implements DebugLogger{
 					Atom.newAtom(_message)};
 		}
 		outlet(0, mylist);
+		if(print)
+			post(Atom.toOneString(mylist));
 	}
 
 	public void printError(boolean _showTime, String _level, String _className, String _message) {
@@ -66,5 +79,8 @@ public class Debugger extends MaxObject implements DebugLogger{
 					Atom.newAtom(_message)};
 		}
 		outlet(1, mylist);
+		if(print)
+			error(Atom.toOneString(mylist));
+
 	}
 }
