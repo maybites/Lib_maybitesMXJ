@@ -109,7 +109,7 @@ public class PattrStore{
 			}
 			return true;
 		}
-		
+				
 		public void subscriptionConnected(String distributor, DynSubscription subscription) {
 			LinkCallback link = (LinkCallback) subscription.getCallbackObject();
 			Debug.verbose("PattrStore["+ storename + "]"," connected to subscription");

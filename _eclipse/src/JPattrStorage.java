@@ -91,7 +91,7 @@ public class JPattrStorage extends MaxObject implements PattrCallback{
 				if(!storage.clientEvent(message, args[0].toFloat())){
 					// it must be another message...
 				}
-			} else {
+			}else {
 				message(message, args);
 			}
 		}

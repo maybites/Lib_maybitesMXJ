@@ -62,7 +62,7 @@ public class LinkCallback {
 			}
 		}
 	}
-
+	
 	protected float get(String _address){
 		float ret = 0.0f;
 		if(getter != null){

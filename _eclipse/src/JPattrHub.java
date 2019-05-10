@@ -57,6 +57,11 @@ public class JPattrHub extends MaxObject implements PattrCallback{
 		//this.outlet(PATTR_OUTLET, new Atom[]{Atom.newAtom((String)argObjectArray[0]), Atom.newAtom((Float)argObjectArray[1])});
 	}
 
+	public void setAddressValue(String address, float[] value){
+		this.outlet(PATTR_OUTLET, address, Atom.newAtom(value));
+		//this.outlet(PATTR_OUTLET, new Atom[]{Atom.newAtom((String)argObjectArray[0]), Atom.newAtom((Float)argObjectArray[1])});
+	}
+
 
 	public void attributes(Atom[] args){
 		if(getInlet() == PATTR_INLET){
